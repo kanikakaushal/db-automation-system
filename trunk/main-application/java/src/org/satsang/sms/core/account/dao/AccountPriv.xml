@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+  
+<sqlMap namespace="AccountPriv">
+	<select id="getAccountProfiles" parameterClass="map"
+		resultClass="java.util.HashMap"> 
+		
+		SELECT ra.role_id as roleId, r.role_name as roleName, r.description as roleDesc,
+		ra.context_id as contextId, c.context_name as contextName, ra.activity_id as activityId, a.activity_name as activityName
+		from
+		role r, context c, activity a, account_role ar, role_access ra 
+		where
+		c.context_id = ra.context_id and a.activity_id = ra.activity_id 
+		and
+		ar.account_id = #accountID# and r.role_id = ra.role_id 
+		and ra.role_id = ar.role_id order by r.role_id, ra.context_id, ra.activity_id
+	</select>
+	
+	<select id="getAccountCommunities" parameterClass="map"
+		resultClass="java.util.HashMap"> 
+		
+		SELECT b.instance_id as instanceId, b.instance_name as instanceName, b.instance_type as instanceType,
+		a.role_id as roleId
+		from account_role a, community_instance b 
+		where
+		a.instance_id = b.instance_id and a.account_id = #accountID# 
+		order by a.role_id, a.instance_id
+	</select>
+	
+	
+	<select id="getActivityId" parameterClass="map" resultClass="int">
+		SELECT ACTIVITY_ID FROM ACTIVITY WHERE ACTIVITY_NAME = #activityName#
+	</select>
+	
+	<select id="getContextId" parameterClass="map" resultClass="int">
+		SELECT CONTEXT_ID FROM CONTEXT WHERE CONTEXT_NAME = #contextName#
+	</select>
+</sqlMap>

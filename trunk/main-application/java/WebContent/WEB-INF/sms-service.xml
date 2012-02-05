@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+		
+	<!-- ************** Account Configuration *************** -->
+	<bean name="Account" class="org.satsang.sms.core.account.Account"
+		scope="prototype">
+	</bean>
+	<bean name="AccountHandler" class="org.satsang.sms.core.account.AccountHandler">
+		<property name="handleToAccountDAO" ref="AccountIbatisDAO" />
+		<property name="handleToAccountPrivDAO" ref="AccountPrivIbatisDAO" />
+	</bean>
+	
+	
+	
+	
+	<!-- ************** Event Configuration *************** -->
+	<bean id="Event" class="org.satsang.sms.core.event.Event" scope="prototype">
+	</bean>
+	<bean id="EventHandler" class="org.satsang.sms.core.event.EventHandler">
+		<property name="eventDAO" ref="EventIbatisDAO" />
+	</bean>
+    
+    <!-- ************** Community Configuration *************** -->
+	<bean id="CommunityHandler" class="org.satsang.sms.core.communities.CommunityHandler">
+		<property name="communityDao" ref="CommunityIbatisDao" />
+	</bean>
+    
+    <!-- ************** Member Configuration *************** -->
+	<bean id="MemberHandler" class="org.satsang.sms.core.member.MemberHandler">
+		<property name="memberDao" ref="MemberIbatisDao" />
+	</bean>
+    
+    
+    <!-- ************** Configure the activities here *************** -->
+	<bean name="TVC" class="org.satsang.sms.core.activities.TvcActivity"
+		scope="prototype">
+		<property name="listOfActions">
+			<map>
+				<entry key="register">
+					<value>New Registration</value>
+				</entry>
+				<entry key="search">
+					<value>Search Registration</value>
+				</entry>
+				<entry key="edit">
+					<value>Edit Registration</value>
+				</entry>
+				<entry key="duplicate">
+					<value>Print Duplicate Card</value>
+				</entry>
+				<entry key="viewAssociations">
+					<value>View Associations</value>
+				</entry>
+				<entry key="addAssociations">
+					<value>Add Associations</value>
+				</entry>
+				<entry key="sadanStats">
+					<value>Smart Assist for Sadans</value>
+				</entry>
+				<entry key="sabhaQuarterStats">
+					<value>Smart Assist for Sabha Quarters</value>
+				</entry>
+				<entry key="licenseeDetails">
+					<value>Get Licensee details for a private quarter</value>
+				</entry>
+				<entry key="primaryDetails">
+					<value>Get primary details for an associate</value>
+				</entry>
+				<entry key="validateAssociate">
+					<value>Validate the associate id</value>
+				</entry>
+				<entry key="getPQList">
+					<value>List of private quarters in a colony</value>
+				</entry>
+			</map>
+		</property>
+		<property name="actionHandler" ref="TVCHandler" />
+	</bean>
+	<bean name="TVCHandler" class="org.satsang.sms.core.activities.TvcActionHandler"
+		scope="prototype">
+		<property name="tvcDao" ref="TVCIbatisDao" />
+		<property name="configParams">
+			<map>
+				<entry key="tvcIdMask">
+					<value>201007</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean name="Reports" class="org.satsang.sms.core.activities.ReportingActivity"
+		scope="prototype">
+		<property name="listOfActions">
+			<map>
+				<entry key="generate">
+					<value>Generate Report</value>
+				</entry>
+				<entry key="list">
+					<value>View Reports</value>
+				</entry>
+				<entry key="view">
+					<value>Open Report</value>
+				</entry>
+			</map>
+		</property>
+		<property name="actionHandler" ref="ReportingHandler" />
+	</bean>
+	<bean name="ReportingHandler"
+		class="org.satsang.sms.core.activities.ReportingActionHandler" scope="prototype">
+		<property name="reportingDao" ref="ReportingIbatisDao" />
+	</bean>
+	
+    
+    <!-- ************** Configure the contexts here *************** -->
+	<bean id="SNC" class="org.satsang.sms.core.context.ShiromaniNagarCommittee"
+		scope="prototype">
+		<property name="contextName">
+			<value>SNC</value>
+		</property>
+		<property name="activityMap">
+			<map>
+				<entry key="TVC">
+					<ref bean="TVC" />
+				</entry>
+				<entry key="Reports">
+					<ref bean="Reports" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+	  
+    
+    <!-- ************** Configure the communities here *************** -->
+	<bean id="Branch" class="org.satsang.sms.core.communities.BranchSatsang"
+		scope="prototype">
+		<property name="contextMap">
+			<map>
+				<entry key="SNC">
+					<ref bean="SNC" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="District" class="org.satsang.sms.core.communities.District"
+		scope="prototype">
+		<property name="contextMap">
+			<map>
+				<entry key="SNC">
+					<ref bean="SNC" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="Region" class="org.satsang.sms.core.communities.Region"
+		scope="prototype">
+		<property name="contextMap">
+			<map>
+				<entry key="SNC">
+					<ref bean="SNC" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<bean id="Headquarter" class="org.satsang.sms.core.communities.Region"
+		scope="prototype">
+		<property name="contextMap">
+			<map>
+				<entry key="SNC">
+					<ref bean="SNC" />
+				</entry>
+			</map>
+		</property>
+	</bean>    
+    
+    
+       
+    
+    
+    
+    <!-- ************** Configure the controllers here *************** -->
+	<bean name="CommunityController" class="org.satsang.sms.core.controllers.CommunityController">
+		<property name="communityHandler" ref="CommunityHandler" />
+	</bean>
+	<bean name="EventController" class="org.satsang.sms.core.controllers.EventController"
+		init-method="init">
+		<property name="eventHandler">
+			<ref bean="EventHandler" />
+		</property>
+	</bean>
+	<bean name="AccountController" class="org.satsang.sms.core.controllers.AccountController">
+		<property name="accountHandler" ref="AccountHandler" />
+	</bean>
+	<bean name="MemberController" class="org.satsang.sms.core.controllers.MemberController">
+		<property name="memberHandler" ref="MemberHandler" />
+	</bean>
+	<bean name="MasterController" class="org.satsang.sms.core.controllers.MasterController">
+		<property name="refToCommunityController">
+			<ref bean="CommunityController" />
+		</property>
+		<property name="refToEventController">
+			<ref bean="EventController" />
+		</property>
+		<property name="refToAccountController">
+			<ref bean="AccountController" />
+		</property>
+		<property name="refToMemberController">
+			<ref bean="MemberController" />
+		</property>
+	</bean>       
+     
+     
+     <!-- *************** Utility classes -->
+	<!-- >bean id="CSVTVC" class="org.satsang.sms.core.activities.tvc.CSVPrinter">
+		<property name="sharedDir" value="C:/tvc-cards/out/" />
+	</bean>
+	<bean id="PDFTVC" class="org.satsang.sms.core.activities.tvc.JasperPDFPrinter">
+		<property name="sharedDir" value="C:/tvc-cards/out/" />
+		<property name="pathToJasperTemplate" value="C:/tvc-cards/template/tvc-card.jasper" />
+		<property name="tvcDao" ref="TVCIbatisDao" />
+	</bean-->
+	<bean id="PilgrimAccomodationStatisticsManager"
+		class="org.satsang.sms.aspects.statistics.managers.PilgrimAccomodationStatisticsManager"
+		init-method="init">
+		<property name="daoHandler" ref="PilgrimStatisticsDao" />
+		<property name="loadFlag" value="true" />
+	</bean>
+</beans>

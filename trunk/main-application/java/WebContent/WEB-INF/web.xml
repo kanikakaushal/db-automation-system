@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- listener>
+		<listener-class>org.satsang.sms.web.util.SessionExpireListener</listener-class>
+	</listener-->
+	 
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value> /WEB-INF/sms-persistence.xml /WEB-INF/sms-service.xml /WEB-INF/sms-aspects.xml /WEB-INF/sms-print-service.xml
+		</param-value>
+	</context-param>
+	
+	<servlet>
+		<servlet-name>sms</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>sms</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+	
+	<welcome-file-list>
+		<welcome-file>TVCMain.html</welcome-file>
+	</welcome-file-list>
+	
+	<session-config>
+		<session-timeout>-1</session-timeout>
+	</session-config>
+</web-app>

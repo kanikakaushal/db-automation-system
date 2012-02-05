@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<!-- Printer factory -->
+	<bean id="printFactory" class="org.satsang.sms.core.util.print.PrinterFactory" >
+		<property name="managedPools">
+			<map>
+				<entry key="Label" value-ref="labelsPool"></entry>
+				<!--entry key="Card" value-ref="cardsPool"></entry-->
+			</map>
+		</property>
+	</bean>
+	
+	<!-- Printer Pools -->
+	<bean id="labelsPool" class="org.satsang.sms.core.util.print.PrinterPool">
+		<property name="pool">
+			<list>
+				<ref bean="printer1"/>
+				<ref bean="printer2"/>
+			</list>
+		</property>		
+		<property name="terminalMap">
+			<map>
+				<entry key="Terminal 1" value-ref="printer1"></entry>
+				<entry key="Terminal 2" value-ref="printer1"></entry>
+				<entry key="Terminal 3" value-ref="printer2"></entry>
+				<entry key="Terminal 4" value-ref="printer2"></entry>
+				<entry key="Terminal 5" value-ref="printer3"></entry>
+				<entry key="Terminal 6" value-ref="printer3"></entry>
+				<entry key="Terminal 7" value-ref="printer3"></entry>
+				<entry key="Terminal 8" value-ref="printer3"></entry>
+			</map>
+		</property>		
+	</bean>
+	
+	<bean id="cardsPool" class="org.satsang.sms.core.util.print.PrinterPool">
+		<property name="pool">
+			<list>
+				<!-- >ref bean="printer3"/-->
+			</list>
+		</property>		
+	</bean>
+	
+	<!-- Printers.... -->
+	<bean id="abstractPdfPrinter" class="org.satsang.sms.core.util.print.JasperPDFPrinter" abstract="true">
+		<property name="tvcDao" ref="TVCIbatisDao"></property>
+	</bean>
+	
+	<bean id="abstractCsvCardPrinter" class="org.satsang.sms.core.util.print.CardCSVPrinter" abstract="true" />
+	
+	<bean id="abstractCsvLabelPrinter" class="org.satsang.sms.core.util.print.LabelCSVPrinter" abstract="true" />
+	
+	<bean id="printer1" parent="abstractPdfPrinter">
+		<property name="printerName" value="PRINTER1"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/labels/PRINTER1"></property>
+		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/labels/EnablingStamp.jasper"></property>
+	</bean>
+	
+	<bean id="printer2" parent="abstractPdfPrinter">
+		<property name="printerName" value="PRINTER2"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/labels/PRINTER2"></property>
+		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/labels/EnablingStamp.jasper"></property>
+	</bean>
+	
+	<bean id="printer3" parent="abstractPdfPrinter">
+		<property name="printerName" value="PRINTER3"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/labels/PRINTER3"></property>
+		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/labels/EnablingStamp.jasper"></property>
+	</bean>
+	
+	<bean id="printer4" parent="abstractPdfPrinter">
+		<property name="printerName" value="PRINTER4"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/labels/PRINTER4"></property>
+		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/labels/EnablingStamp.jasper"></property>
+	</bean>
+	
+	<!-- >bean id="printer5" parent="abstractCsvLabelPrinter">
+		<property name="printerName" value="PRINTER5"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/labels/PRINTER5"></property>
+	</bean-->
+	
+	<!-- >bean id="printer6" parent="abstractCsvCardPrinter">
+		<property name="printerName" value="PRINTER6"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/cards/PRINTER6"></property>
+	</bean-->
+</beans>

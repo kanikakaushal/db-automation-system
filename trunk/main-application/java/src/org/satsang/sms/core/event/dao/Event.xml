@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+  
+<sqlMap namespace="Event">
+
+	<resultMap id="activeEvents" class="java.util.HashMap">
+		<result property="accountId" column="ACCOUNT_ID" javaType="java.lang.String" />
+		<result property="accountName" column="ACCOUNT_ALIAS" javaType="java.lang.String" />
+		<result property="eventId" column="EVENT_ID" javaType="java.lang.String" />
+		<result property="eventName" column="EVENT_NAME" javaType="java.lang.String" />
+		<result property="communityId" column="INSTANCE_ID" javaType="java.lang.String" />
+		<result property="contextId" column="CONTEXT_ID" javaType="int" />
+		<result property="communityName" column="INSTANCE_NAME" javaType="java.lang.String" />
+		<result property="contextName" column="CONTEXT_NAME" javaType="java.lang.String" />
+		<result property="eventStartDate" column="EVENT_START_DATE"
+			javaType="java.util.Date" />
+		<result property="eventDescription" column="DESCRIPTION"
+			javaType="java.lang.String" />
+		<result property="eventEndDate" column="EVENT_END_DATE"
+			javaType="java.util.Date" />
+		<result property="bhandaraId" column="BHANDARA_ID"
+			javaType="java.lang.String" />
+	</resultMap>
+
+	<update id="endActivity" parameterClass="map">
+		UPDATE EVENT_ACTIVITY
+		SET ACTIVITY_END_DATE = #activityEndDate#
+		WHERE EVENT_ID = #eventId#
+		AND ACTIVITY_ID = #activityId#
+		AND ACCOUNT_ID = #accountId#
+		AND
+		ISNULL(ACTIVITY_END_DATE) 
+	</update>
+
+	<update id="endEvent" parameterClass="map">
+		UPDATE EVENT
+		SET
+		EVENT_END_DATE = #eventEndDate#
+		WHERE EVENT_ID = #eventId#
+	</update>
+
+	<select id="getActiveEvents" resultMap="activeEvents">
+		SELECT ACCOUNT_ID,
+		EVENT_ID,
+		EVENT_NAME, INSTANCE_ID,
+		CONTEXT_ID, EVENT_START_DATE,
+		DESCRIPTION,
+		EVENT_END_DATE,
+		BHANDARA_ID
+		FROM EVENT
+		WHERE ISNULL(EVENT_END_DATE)
+		AND
+		!ISNULL(EVENT_START_DATE)
+  </select>
+  
+  <select id="getNewEvents" resultMap="activeEvents">
+		SELECT e.ACCOUNT_ID as account_id, account_alias, context_name, instance_name,
+		EVENT_ID, EVENT_NAME, e.INSTANCE_ID as instance_id, e.CONTEXT_ID as context_id, EVENT_START_DATE,
+		DESCRIPTION, EVENT_END_DATE, BHANDARA_ID
+		FROM EVENT e, account a, context c, community_instance i
+		WHERE ISNULL(e.EVENT_END_DATE) and e.account_id = a.account_id and e.instance_id = i.instance_id
+   		and e.context_id = c.context_id;		
+  </select>
+
+	<select id="getNonPerishableEvents" resultClass="String">
+		SELECT EVENT_ID
+		FROM EVENT_ACTIVITY WHERE ISNULL(ACTIVITY_END_DATE)
+  </select>
+
+	<select id="getOpenActivities" parameterClass="map"
+		resultClass="java.util.HashMap">
+		SELECT EVENT_ID as eventId, ACTIVITY_NAME as activityName
+		FROM EVENT_ACTIVITY, ACTIVITY
+		WHERE
+		ISNULL(ACTIVITY_END_DATE) AND
+		ACCOUNT_ID = #accountId#
+  </select>
+
+	<select id="getNextEventId" resultClass="int" parameterClass="map">
+		SELECT NEXT_ID
+		FROM EVENT_SEQUENCE_GENERATOR
+		WHERE EVENT_CREATION_DATE = #creationDate# 
+  </select>
+
+	<insert id="createEvent" parameterClass="map">
+		INSERT INTO EVENT
+		(EVENT_ID, EVENT_NAME, INSTANCE_ID, CONTEXT_ID, DESCRIPTION,
+		ACCOUNT_ID, BHANDARA_ID)
+		VALUES (#eventId#, #eventName#, #instanceId#, #contextId#,
+		#description#,#accountId#, #bhandaraId#)
+	</insert>
+
+	<insert id="logEvent" parameterClass="map">
+		INSERT INTO EVENT_LOG
+		(EVENT_ID, LOG_TIME, ACTION)
+		VALUES (#eventId#, #logTime#, #action#)
+	</insert>
+	
+	<insert id="insertNextEventId" parameterClass="map">
+		INSERT INTO EVENT_SEQUENCE_GENERATOR
+		(EVENT_CREATION_DATE, NEXT_ID)
+		VALUES (#creationDate#, #nextId#)
+	</insert>
+	
+	<update id="updateNextEventId" parameterClass="map">
+		UPDATE
+		EVENT_SEQUENCE_GENERATOR
+		SET NEXT_ID = #nextId#
+		WHERE EVENT_CREATION_DATE = #creationDate#
+	</update>
+
+	<insert id="startActivity" parameterClass="map">
+		INSERT INTO
+		EVENT_ACTIVITY
+		(EVENT_ID, ACTIVITY_ID, ACTIVITY_START_DATE, DESCRIPTION, ACCOUNT_ID)
+		VALUES
+		(#eventId#, #activityId#, #activityStartDate#, #description#,
+		#accountId#)
+	</insert>
+	
+	<update id="startEvent" parameterClass="map">
+		UPDATE EVENT 
+		SET EVENT_START_DATE = #eventStartDate#
+		WHERE EVENT_ID = #eventId#
+	</update>
+	
+	<update id="restartEvent" parameterClass="map">
+		UPDATE EVENT 
+		SET EVENT_END_DATE = null
+		WHERE EVENT_ID = #eventId#
+	</update>
+	
+	<select id="getPastEvents" resultMap="activeEvents" parameterClass="map">
+		SELECT e.ACCOUNT_ID as account_id, account_alias, context_name, instance_name,
+		EVENT_ID, EVENT_NAME, e.INSTANCE_ID as instance_id, e.CONTEXT_ID as context_id, 
+		EVENT_START_DATE, 
+		DESCRIPTION, EVENT_END_DATE, BHANDARA_ID
+		FROM EVENT e, account a, context c, community_instance i
+		WHERE !ISNULL(e.EVENT_END_DATE) and e.account_id = #accountId# and  
+		e.account_id = a.account_id and e.instance_id = i.instance_id
+   		and e.context_id = c.context_id and $whereClause$;	
+  </select>
+  
+  <select id="getEvent" resultMap="activeEvents" parameterClass="string">
+		SELECT e.ACCOUNT_ID as account_id, account_alias, context_name, instance_name,
+		EVENT_ID, EVENT_NAME, e.INSTANCE_ID as instance_id, e.CONTEXT_ID as context_id, 
+		EVENT_START_DATE, 
+		DESCRIPTION, EVENT_END_DATE, BHANDARA_ID
+		FROM EVENT e, account a, context c, community_instance i
+		WHERE e.event_id = #eventId# and  
+		e.account_id = a.account_id and e.instance_id = i.instance_id
+   		and e.context_id = c.context_id;	
+  </select>
+</sqlMap>
+

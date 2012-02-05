@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="smsDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/sms" />
+		<property name="username" value="root" />
+		<property name="password" value="admin" />
+	</bean>
+	
+	<bean id="smsSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient" ref="smsSqlMapClient" />
+	</bean>
+
+	<bean id="smsSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean ">
+		<property name="dataSource" ref="smsDataSource" />
+		<property name="configLocation" value="/WEB-INF/sms-queries-locator.xml" />
+	</bean>
+	
+	<bean id="smsActivitiesDataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/sms_activities" />
+		<property name="username" value="root" />
+		<property name="password" value="admin" />
+	</bean>
+	
+	<bean id="smsActivitiesSqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient" ref="smsActivitiesSqlMapClient" />
+	</bean>
+
+	<bean id="smsActivitiesSqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean ">
+		<property name="dataSource" ref="smsActivitiesDataSource" />
+		<property name="configLocation" value="/WEB-INF/sms-activities-queries-locator.xml" />
+	</bean>
+
+	<!-- ALL IBATIS DAO DEFINITIONS COME HERE -->
+	<bean name="AccountIbatisDAO" class="org.satsang.sms.core.account.dao.AccountIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsSqlMapClientTemplate" />
+	</bean>
+	<bean name="AccountPrivIbatisDAO" class="org.satsang.sms.core.account.dao.AccountPrivIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsSqlMapClientTemplate" />
+	</bean>
+	<bean name="EventIbatisDAO" class="org.satsang.sms.core.event.dao.EventIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsSqlMapClientTemplate" />
+	</bean>
+	<bean name="CommunityIbatisDao" class="org.satsang.sms.core.communities.dao.CommunityIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsSqlMapClientTemplate" />
+	</bean>	
+	<bean name="MemberIbatisDao" class="org.satsang.sms.core.member.dao.MemberIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsSqlMapClientTemplate" />
+	</bean>
+	
+	<bean name="TVCIbatisDao" class="org.satsang.sms.core.activities.dao.TvcIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsActivitiesSqlMapClientTemplate" />
+	</bean>
+	<bean name="ReportingIbatisDao" class="org.satsang.sms.core.activities.dao.ReportingIbatisDao">
+		<property name="sqlMapClientTemplate" ref="smsActivitiesSqlMapClientTemplate" />
+	</bean>
+	
+	<bean name="PilgrimStatisticsDao" class="org.satsang.sms.aspects.statistics.dao.PilgrimStatisticsDao">
+		<property name="sqlMapClientTemplate" ref="smsSqlMapClientTemplate" />
+	</bean>
+	
+</beans>

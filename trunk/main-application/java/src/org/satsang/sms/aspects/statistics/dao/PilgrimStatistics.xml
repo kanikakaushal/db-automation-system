@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PilgrimStatistics">
+
+	<select id="SQAccomodationStats" 
+		resultClass="org.satsang.sms.aspects.statistics.QuarterStats"> 
+		
+		SELECT 
+		q.colony_name as colonyName, 
+		q.quarter_no as quarterNo, 
+		(q.quarter_capacity - q_stat.occupancy) as quarterVacancy,
+		q.quarter_capacity as quarterCapacity,
+		q_stat.occupancy as quarterOccupancy
+		FROM db_sabha_quarter q LEFT JOIN
+		( SELECT
+			count(*) + sum(MEMBER_CHILDREN_COUNT) as occupancy,
+			member_local_address as local_address,
+			member_local_colony as colony 
+			FROM sms_activities.tvc_record 
+			WHERE
+			member_stay_category = 'Sabha Quarters' 
+			AND NOW() BETWEEN member_stay_fromdate and member_stay_todate 
+			GROUP BY member_local_address ) as q_stat 
+		ON q.quarter_no = q_stat.local_address 
+		AND q.colony_name = q_stat.colony 
+		ORDER BY q.colony_name, quarterVacancy, q.quarter_no
+	</select>
+	
+	<select id="PQAccomodationStats" 
+		resultClass="org.satsang.sms.aspects.statistics.ColonyStats"> 
+		
+		SELECT 
+		sum(x.children) as childCount,
+		sum(x.female) as femaleCount, 
+		sum(x.male) as maleCount, 
+		x.member_local_colony as colonyName,
+		sum(x.children) + sum(x.female) + sum(x.male) as totalOccupancy
+		FROM
+		(SELECT 
+			MEMBER_CHILDREN_COUNT as children,
+			member_local_colony, member_gender, 0 as female, 1 as male
+			FROM sms_activities.tvc_record
+			WHERE (member_stay_category = 'Private Quarters'
+			OR member_stay_category = 'Outside Dayalbagh')
+			AND member_gender = 'Male'
+			AND NOW() BETWEEN member_stay_fromdate and member_stay_todate
+		UNION ALL
+      	SELECT 
+	      	MEMBER_CHILDREN_COUNT as children,
+			member_local_colony, member_gender, 1 as female, 0 as male
+			FROM sms_activities.tvc_record
+			WHERE (member_stay_category = 'Private Quarters'
+			OR member_stay_category = 'Outside Dayalbagh')
+			AND member_gender = 'Female'
+			AND NOW() BETWEEN member_stay_fromdate and member_stay_todate) as x
+		GROUP BY x.member_local_colony
+	</select>
+	
+	<select id="SadanAccomodationStats" 
+		resultClass="org.satsang.sms.aspects.statistics.SadanStats"> 
+		
+		SELECT
+		master_sadan.sadan_name as sadanName,
+		master_sadan.sadan_capacity as capacity,
+		children as childCount,
+		females as femaleCount, 
+		males as maleCount,
+		(children + males+females) as occupancy,
+		(sadan_capacity - (children + males+females)) as vacancy
+		FROM
+			db_sadan as master_sadan LEFT JOIN
+			(SELECT sum(x.children) as children, sum(x.female) as females, sum(x.male) as males, x.member_local_sadan as sadan_name
+			FROM
+				(SELECT MEMBER_CHILDREN_COUNT as children,
+				member_local_sadan, member_gender, 0 as female, 1 as male
+				FROM sms_activities.tvc_record
+				WHERE member_stay_category = 'Sadan'
+				AND member_gender = 'Male'
+				AND NOW() BETWEEN member_stay_fromdate and member_stay_todate
+			 	UNION ALL
+      			SELECT MEMBER_CHILDREN_COUNT as children,
+				member_local_sadan, member_gender, 1 as female, 0 as male
+				FROM sms_activities.tvc_record
+				WHERE member_stay_category = 'Sadan'
+				AND member_gender = 'Female'
+				AND NOW() BETWEEN member_stay_fromdate and member_stay_todate) as x
+			GROUP BY x.member_local_sadan) as sadan_stat
+		ON sadan_stat.sadan_name = master_sadan.sadan_name
+	</select>
+	
+</sqlMap>
