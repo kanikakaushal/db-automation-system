@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+		<mx:Script>
+			<![CDATA[
+				// Classes for icons
+				[Embed(source='../../../Resource/tvc.png')]
+				[Bindable]
+				public static var tvc:Class;
+				[Embed(source='../../../Resource/newreg.png')]
+				[Bindable]
+				public static var newreg:Class;
+				[Embed(source='../../../Resource/settings.png')]
+				[Bindable]
+				public static var vmreg:Class;
+				[Embed(source='../../../Resource/reports.png')]
+				[Bindable]
+				public static var reports:Class;	
+				[Embed(source='../../../Resource/arrival.png')]
+				[Bindable]
+				public static var arrival:Class;
+				[Embed(source='../../../Resource/departure.png')]
+				[Bindable]
+				public static var departure:Class;
+				[Embed(source='../../../Resource/searchbyname.png')]
+				[Bindable]
+				public static var searchbyname:Class;
+				[Embed(source='../../../Resource/searchbydate.png')]
+				[Bindable]
+				public static var searchbydate:Class;
+				[Embed(source='../../../Resource/my.png')]
+				[Bindable]
+				public static var my:Class;
+				[Embed(source='../../../Resource/search.png')]
+				[Bindable]
+				public static var search:Class;
+				[Embed(source='../../../Resource/success.png')]
+				[Bindable]
+				public static var success:Class;
+				[Embed(source='../../../Resource/error.png')]
+				[Bindable]
+				public static var error:Class;
+				[Embed(source='../../../Resource/preview.png')]
+				[Bindable]
+				public static var preview:Class;
+				[Embed(source='../../../Resource/associate.png')]
+				[Bindable]
+				public static var associate:Class;
+				[Embed(source='../../../Resource/event.png')]
+				[Bindable]
+				public static var event:Class;
+				[Embed(source='../../../Resource/select.png')]
+				[Bindable]
+				public static var select:Class;
+				[Embed(source='../../../Resource/settings.png')]
+				[Bindable]
+				public static var settings:Class;
+				[Embed(source='../../../Resource/manage.png')]
+				[Bindable]
+				public static var manage:Class;
+				[Embed(source='../../../Resource/duplicate.png')]
+				[Bindable]
+				public static var duplicate:Class;
+				[Embed(source='../../../Resource/150.svg')]		
+				[Bindable]
+				public static var logo:Class;					
+			]]>
+		</mx:Script>
+</mx:Canvas>

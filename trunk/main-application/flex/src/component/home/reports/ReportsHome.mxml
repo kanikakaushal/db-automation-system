@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	xmlns:compsReport="component.home.reports.*">
+
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllImageResources;
+		]]>
+	</mx:Script>
+
+	<mx:Canvas width="100%" height="100%">
+		<mx:VBox 	width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+					paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+			<mx:TabNavigator id="reportsTabNavigator" width="100%" height="100%"
+				paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+				<mx:Canvas id="tvcReportsTab" label="TVC" width="100%" height="100%" 
+					icon="{component.DataSources.AllImageResources.tvc}">
+						<compsReport:TVCHome id="tvcReports"/>
+				</mx:Canvas>
+			</mx:TabNavigator>			
+		</mx:VBox>
+	</mx:Canvas>
+</mx:Canvas>

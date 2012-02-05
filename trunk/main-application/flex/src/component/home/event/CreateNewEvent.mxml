@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:components="com.hillelcoren.components.*" 
+	xmlns:ns1="nz.co.codec.flex.multicolumnform.*" initialize="updateDS()" xmlns:CustomClasses="CustomClasses.*">
+    <mx:Script>
+        <![CDATA[
+        	import mx.validators.Validator;
+        	import mx.events.ValidationResultEvent;
+        	import mx.containers.HBox;
+            import mx.containers.ControlBar;
+            import mx.containers.Panel;
+            import mx.containers.VBox;
+            import mx.controls.Button;
+            import mx.controls.Label;
+            import mx.controls.Spacer;
+            import mx.controls.Image;
+            import mx.managers.PopUpManager;
+            import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			    		            
+			import component.DataSources.AllImageResources;
+			import mx.core.Application;
+			import mx.controls.Alert;
+			import mx.utils.StringUtil;			
+			
+            private var panel:Panel;
+
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+	        private var communitySelected:String = new String("");
+	        [Bindable]
+	        private var contextDataProvider:XMLList = new XMLList();
+		
+/*********************HTTP Service Calls ******************************/		
+			public function updateDS():void
+			{
+				callService("/communities.do");
+				/* do some cleanup also */
+				eventName.text = "";
+				eventDescription.text = "";
+				eventCreateStatus.text = "";
+				eventCreateStatus.visible = false;
+				eventCreateStatusHBox.visible = false;
+				community.prompt = "Select One";
+				context.prompt = "Select One";
+				createButton.enabled = false;
+			}
+
+			public function callService(url:String):void
+			{
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "events/create.do":
+							var requestObj:Object = new Object();
+							requestObj.CommunityId = communitySelected;
+							requestObj.ContextName = context.text;
+							requestObj.EventName = eventName.text;
+							requestObj.EventDesc = eventDescription.text;
+							if(isBhandara.selected){
+								requestObj.BhandaraId = bhandaraList.selectedItem.@id;
+							}else {
+								requestObj.BhandaraId = "0";
+							}
+							service.request = requestObj;
+						break;
+						case "/communities.do":
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+
+	        public function httpResult(event:ResultEvent):void
+	        {
+	        	switch (serviceCalled)
+	        	{
+		        	case "events/create.do":
+		        		component.DataSources.AllDataSources.eventCreateStatus = new XMLList(event.result);	        		
+		        		if(component.DataSources.AllDataSources.eventCreateStatus.event.@status == "Success")
+		        		{
+							/* Modified by Gaurav Caprihan to address Bug # 43 */
+		        			clearAll();
+							/* Modified by Gaurav Caprihan to address Bug # 43 */		        			
+		        			eventCreateStatus.text = "Event with ID: " +  component.DataSources.AllDataSources.eventCreateStatus.event.@id +
+		        									" created successfully! Please proceed to activate it.";	        			
+					}						
+		        		else
+		        			eventCreateStatus.text = "Problem creating event!";
+		        		eventCreateStatus.visible = true;
+		        		eventCreateStatusHBox.visible = true;
+					break;
+					case "/communities.do":
+						component.DataSources.AllDataSources.availableCommunityList = new XMLList(event.result);
+					break;
+					default:
+						Alert.show("Unrecognized service called");        		
+	        	}
+			}
+/*********************HTTP Service Calls ******************************/		
+
+            private function createEvent():void {
+                var vb:VBox = new VBox();
+                var hb:HBox = new HBox();
+ 				var label:Label = new Label();
+ 				var image:Image = new Image();
+
+				var cb:ControlBar = new ControlBar();
+				var b1:Button = new Button();
+
+                b1.label = "OK";
+                b1.addEventListener(MouseEvent.CLICK, closePopUp);
+
+				cb.setStyle("horizontalAlign", "center");
+				cb.setStyle("verticalAlign", "middle");
+                cb.addChild(b1);
+
+				label.text = component.DataSources.AllDataSources.eventCreateStatus.event.@details + "!";
+				if(component.DataSources.AllDataSources.eventCreateStatus.event.@status != "Success")
+				{
+					image.source = component.DataSources.AllImageResources.error;
+					label.setStyle("color", "red");
+					panel.setStyle("color", "red");
+				}
+				else
+					image.source = component.DataSources.AllImageResources.success;
+
+				hb.setStyle("horizontalAlign", "center");
+				hb.setStyle("verticalAlign", "middle");					
+				hb.addChild(image);
+				hb.addChild(label)
+                vb.setStyle("paddingBottom", 5);
+                vb.setStyle("paddingLeft", 5);
+                vb.setStyle("paddingRight", 5);
+                vb.setStyle("paddingTop", 5);
+				vb.setStyle("horizontalAlign", "center");
+				vb.setStyle("verticalAlign", "middle");				
+                vb.addChild(hb);
+
+                panel = new Panel();
+                panel.setStyle("horizontalAlign", "center");
+                panel.setStyle("verticalAlign", "middle");
+                panel.title = "Event " + component.DataSources.AllDataSources.eventCreateStatus.event.@id;
+                panel.width = 300;
+                panel.height = 180;
+                panel.addChild(vb);
+                panel.addChild(cb);
+
+                PopUpManager.addPopUp(panel, this, true);
+                PopUpManager.centerPopUp(panel);
+            }
+
+            private function closePopUp(evt:MouseEvent):void {
+                PopUpManager.removePopUp(panel);
+            }
+
+            private function clearAll():void {
+                eventName.text = null;
+                eventName.validateNow();
+                eventName.text = null;
+                eventName.prompt="e.g. Bhandara July 2010";
+                eventDescription.text = null;
+                eventDescription.validateNow();
+                eventDescription.text = null;
+                eventDescription.prompt="e.g. Bhandara of Param Guru Dr. M.B. Lal Sahab"
+				eventCreateStatus.text = "";
+				eventCreateStatus.visible = false;
+				eventCreateStatusHBox.visible = false;
+				/* Change made by Gaurav Caprihan on 6/21 against Bug # 13 */ 				
+				community.selectedIndex = -1;
+				context.selectedIndex = -1;
+				isBhandara.selected = false;
+				bhandaraList.visible = false;
+				validateUs(); 
+				/* Change made by Gaurav Caprihan on 6/21 against Bug # 13 */               
+            }
+            
+            private function comboBox_labelFunc(item:Object):String 
+            {
+                return StringUtil.substitute("{0} ({1})", item.@name, item.@id);
+            }
+            
+            private function setContextDP():void
+            {
+            	communitySelected = community.text.substring(community.text.indexOf('(') + 1, community.text.indexOf(')'));
+            	context.dataProvider = component.DataSources.AllDataSources.availableCommunityList.communities.community.(@id==communitySelected).context.@name
+            	validateUs();
+            }
+            
+            private function getContextDP():XMLList
+            {
+            	return contextDataProvider;
+            } 
+
+		private function submitRequest():void
+		{
+			if(communitySelected != "Select One" && context.text != "Select One")
+				callService('events/create.do');
+			else
+				Alert.show("Error! You need to select a Community and Context!");	
+		}
+		
+		private function resetForm() :void
+		{
+			createButton.enabled = false;
+		}
+		private function validateUs() :void
+		{
+			createButton.enabled = (Validator.validateAll([val1,val2,val3,val4]).length == 0);
+		}    
+		private function showBhandaraList() : void
+		{
+			if(isBhandara.selected == true){
+				bhandaraList.visible = true;
+				SelectBhandara.visible = true;
+			}else if(isBhandara.selected == false){
+				bhandaraList.visible = false;
+				SelectBhandara.visible = false;
+			}	
+		}        
+                     
+        ]]>
+    </mx:Script>
+	
+	<mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" creationComplete="resetForm()">
+		<ns1:MultiColumnForm numColumns="2" width="75%" >
+		    <ns1:MultiColumnFormItem label="Event Name:" colspan="2" width="100%">
+		        <components:PromptTextInput id="eventName" width="100%" prompt="e.g. Bhandara April 2010" change="validateUs()"/>
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem label="Event Description:" colspan="2" width="100%">			
+		        <components:PromptTextInput id="eventDescription" width="100%" prompt="e.g. Bhandara of Param Guru Huzur Sarkar Sahab" change="validateUs()"/>
+		    </ns1:MultiColumnFormItem>
+		    <mx:HRule width="100%"/>
+		    <ns1:MultiColumnFormItem label="Community:">
+		        <mx:ComboBox id="community" labelFunction="comboBox_labelFunc"
+		        			 dataProvider="{component.DataSources.AllDataSources.availableCommunityList.communities.community}"
+		        			 change="setContextDP()"/>
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem label="Context:">
+		        <mx:ComboBox id="context" change="validateUs()"/> 
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem label="Bhandara Event">
+		        <mx:CheckBox id="isBhandara" change="showBhandaraList()"/> 
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem id="SelectBhandara" label="Select bhandara:" visible="false">
+		        <mx:ComboBox id="bhandaraList" visible="false" dataProvider="{component.DataSources.AllDataSources.bhandaraList.bhandaraId}"
+		        	labelField="@name"/>		        
+		    </ns1:MultiColumnFormItem>
+		    <mx:HRule id="endHRule" width="100%"/>
+		    <mx:HBox id="eventCreateStatusHBox" width="100%" horizontalAlign="center" verticalAlign="middle" 
+		    			visible="false" borderStyle="solid">
+		    	<mx:Label id="eventCreateStatus" visible="false"/> 
+		    </mx:HBox>
+		</ns1:MultiColumnForm>
+		<mx:ControlBar>
+			<mx:HBox width="100%" height="100%">
+				<mx:Button label="Clear" id="clearButton" click="{clearAll()}"/>
+				<mx:Spacer width="100%"/>
+				<mx:Button label="Create" id="createButton" click="submitRequest()"/>				
+			</mx:HBox>
+	</mx:ControlBar>
+	</mx:VBox>
+
+	<CustomClasses:AdvancedStringValidator id="val1" source="{eventName}" property="text" required="true" 
+											allowSpecialCharacters="false" allowNumbers="true" allowSpaces="true" allowPeriods="true"
+											specialCharacterNotAllowedError="Special Characters not allowed"/> 			
+	<CustomClasses:AdvancedStringValidator id="val2" source="{eventDescription}" property="text" required="true" allowNumbers="true"
+											allowSpecialCharacters="false" allowSpaces="true" allowPeriods="true"
+											specialCharacterNotAllowedError="Special Characters not allowed"/> 			
+	<mx:StringValidator id="val3" source="{community}" property="text" required="true"/>
+	<mx:StringValidator id="val4" source="{context}" property="text" required="true"/>
+</mx:Canvas>

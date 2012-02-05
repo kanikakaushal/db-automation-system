@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 	xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:components="com.hillelcoren.components.*"
+			xmlns:ns1="nz.co.codec.flex.multicolumnform.*" >
+	<mx:Panel 	width="50%" height="50%" title="Add/Modify Associations" horizontalAlign="center"
+				 paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script>
+        <![CDATA[
+        	import mx.collections.ArrayCollection;
+        	import component.DataSources.AllDataSources;
+        	import component.DataSources.AllImageResources;
+            import mx.collections.HierarchicalData;
+            import mx.collections.XMLListCollection;
+            import mx.events.ListEvent;
+            import mx.rpc.events.FaultEvent;
+            import mx.rpc.events.ResultEvent;
+            import mx.rpc.http.HTTPService;
+            import mx.controls.Alert;
+            import mx.controls.Image;
+            import mx.containers.Panel;
+            import mx.managers.PopUpManager;
+            
+			[Bindable]
+			private var cellWidth:int = 150;
+	        private var panel:Panel;
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+
+			public function callService(url:String):void
+			{
+		            var requestObj:Object = new Object();
+		            service = new HTTPService();
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "tvc/associations/validate.do":	
+							requestObj.AssociateTvcId = assocTVCId.text;
+							requestObj.TvcId = tvcId.text;
+							requestObj.AssociateRelation = assocToPrimaryRel.text;
+							service.request = requestObj;
+						break;
+						case "tvc/associations/add.do":
+							requestObj.AssociateTvcId = assocTVCId.text;
+							service.request = requestObj;
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+	
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();					
+			}
+
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+				Alert.show("Error calling tvc/associations/validate.do");
+	        }
+	
+		    public function httpResult(event:ResultEvent):void
+		    {
+		    	switch (serviceCalled)
+		    	{
+						case "tvc/associations/validate.do":	
+						    component.DataSources.AllDataSources.validateAssocTVCID = new XML(event.result);
+						    if(component.DataSources.AllDataSources.validateAssocTVCID.status.@msg == "Success"){
+ 								component.DataSources.AllDataSources.anAssociationArray.push(
+ 								{		id:component.DataSources.AllDataSources.validateAssocTVCID.status.@associateId, 
+ 										fName:component.DataSources.AllDataSources.validateAssocTVCID.status.@fName, 
+ 										lName:component.DataSources.AllDataSources.validateAssocTVCID.status.@lName, 
+ 										relation:component.DataSources.AllDataSources.validateAssocTVCID.status.@relation, 
+ 										gender:component.DataSources.AllDataSources.validateAssocTVCID.status.@sex,
+										branchName:component.DataSources.AllDataSources.validateAssocTVCID.status.@branchName});
+								component.DataSources.AllDataSources.associationArrayCollection.source = component.DataSources.AllDataSources.anAssociationArray;
+								component.DataSources.AllDataSources.assocCount = component.DataSources.AllDataSources.associationArrayCollection.length;
+								component.DataSources.AllDataSources.associationArrayCollection.refresh();
+						    }
+						    else{
+						    	createErrorPopup(component.DataSources.AllDataSources.validateAssocTVCID.status.@msg);
+						    }
+						break;
+					default:
+						Alert.show("Unrecognized service called");        		
+		    	}
+			}
+
+		private function createErrorPopup(aStatusMessage:String):void
+		{
+			var vb:VBox = new VBox();
+			var hb:HBox = new HBox();
+			var aLabel:Label = new Label();
+			var image:Image = new Image();
+
+			var cb:ControlBar = new ControlBar();
+			var b1:Button = new Button();
+		
+            b1.label = "OK";
+            b1.addEventListener(MouseEvent.CLICK, closePopUp);
+
+			cb.setStyle("horizontalAlign", "center");
+			cb.setStyle("verticalAlign", "middle");
+            cb.addChild(b1);
+
+            panel = new Panel();
+            panel.setStyle("horizontalAlign", "center");
+            panel.setStyle("verticalAlign", "middle");
+            panel.setStyle("backgroundAlpha", "1");
+            panel.width = 650;
+            panel.height = 180;
+
+			image.source = component.DataSources.AllImageResources.success;
+			aLabel.text = 	aStatusMessage;
+			panel.title = "TVC Association Error";
+
+			hb.setStyle("horizontalAlign", "center");
+			hb.setStyle("verticalAlign", "middle");					
+			hb.addChild(image);
+			hb.addChild(aLabel)
+			vb.setStyle("paddingBottom", 5);
+			vb.setStyle("paddingLeft", 5);
+			vb.setStyle("paddingRight", 5);
+			vb.setStyle("paddingTop", 5);
+			vb.setStyle("horizontalAlign", "center");
+			vb.setStyle("verticalAlign", "middle");
+			vb.setStyle("color", "red");
+			vb.addChild(hb);										
+
+            panel.addChild(vb);
+            panel.addChild(cb);
+			panel.setStyle("color", "red");            
+
+            PopUpManager.addPopUp(panel, this, true);
+            PopUpManager.centerPopUp(panel);
+        }
+
+        private function closePopUp(evt:MouseEvent):void {
+            PopUpManager.removePopUp(panel);
+            assocTVCId.text = "";
+            assocToPrimaryRel.selectedItem = null;
+            assocToPrimaryRel.prompt = "Relation";		
+        }
+
+		private function closeThisPopup():void{
+			clearAssocData();
+			PopUpManager.removePopUp(this);
+		}
+
+		public function deleteItem(event:MouseEvent):void{      
+			component.DataSources.AllDataSources.associationArrayCollection.removeItemAt(myGrid.selectedIndex);
+			component.DataSources.AllDataSources.associationArrayCollection.refresh();
+			if (component.DataSources.AllDataSources.associationArrayCollection.length == 0)
+				parentDocument.stxHome.activityLauncher.taskLauncher.newReg.clearAssocPopup();
+		}
+		
+		public function clearAssocData():void{
+			assocTVCId.text = "";
+			assocTVCId.prompt = "Associate TVC Id";			
+			assocToPrimaryRel.selectedItem = null;
+			assocToPrimaryRel.prompt = "Relation";
+		}
+        ]]>
+    </mx:Script>
+		<mx:VBox width="100%" height="100%" borderStyle="solid" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+				verticalAlign="middle" horizontalAlign="center">
+			<ns1:MultiColumnForm numColumns="2">
+			    <ns1:MultiColumnFormItem label="TVC ID:">			
+			        <mx:Label id="tvcId" text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@id}" width="100%"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>
+			    <ns1:MultiColumnFormItem label="Associate TVC ID:">			
+			        <components:PromptTextInput id="assocTVCId" prompt="Assoc TVC Id" width="{cellWidth}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem label="Relation To Primary:">
+				<components:AutoComplete 	id="assocToPrimaryRel" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
+											labelField="@label" selectedItemStyleName="none" prompt="Relation" allowNewValues="true"/>				
+			    </ns1:MultiColumnFormItem>
+			</ns1:MultiColumnForm>
+			<mx:ControlBar>
+				<mx:Button label="Clear" click="{clearAssocData()}"/>
+				<mx:Spacer width="100%"/>
+				<mx:Button id="submitButton" label="Add" click="{callService('tvc/associations/validate.do')}"/>
+			</mx:ControlBar>
+
+		<mx:Label text="Current Associations" horizontalCenter="true"/>
+	        <mx:DataGrid id="myGrid" dataProvider="{component.DataSources.AllDataSources.associationArrayCollection}" editable="true" width="100%"> 
+	            <mx:columns>
+	                <mx:DataGridColumn dataField="id" headerText="ID" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="fName" headerText="First Name" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="lName" headerText="Last Name" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="branchName" headerText="Branch" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="relation" headerText="Relation" resizable="true" editable="true" textAlign="center"/>
+					<mx:DataGridColumn headerText="Delete Item" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:LinkButton label="Remove" click="outerDocument.deleteItem(event)"/>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>       
+			</mx:DataGrid>  
+			<mx:ControlBar>
+				<mx:HBox width="100%" height="100%">
+					<mx:Button label="Submit" click="{closeThisPopup();}"/>				
+				</mx:HBox>
+			</mx:ControlBar>
+		</mx:VBox>
+	</mx:Panel>	
+</mx:Canvas>

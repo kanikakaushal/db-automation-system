@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="nz.co.codec.flex.multicolumnform.*" >
+	<mx:Panel 	width="640" height="480" title="Verify Associations" horizontalAlign="center"
+				 paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+    <mx:Script>
+        <![CDATA[
+        	import mx.collections.ArrayCollection;
+        	import component.DataSources.AllDataSources;
+        	import component.DataSources.AllImageResources;
+            import mx.collections.HierarchicalData;
+            import mx.collections.XMLListCollection;
+            import mx.events.ListEvent;
+            import mx.controls.Alert;
+
+			public function submitRequest():void
+			{
+				parentDocument.stxHome.activityLauncher.taskLauncher.newReg.callService('tvc/new.do');
+			}
+
+			public function deleteItem(event:MouseEvent):void{      
+				component.DataSources.AllDataSources.associationArrayCollection.removeItemAt(myGrid.selectedIndex);
+				component.DataSources.AllDataSources.associationArrayCollection.refresh();
+				if (component.DataSources.AllDataSources.associationArrayCollection.length == 0)
+					parentDocument.stxHome.activityLauncher.taskLauncher.newReg.clearAssocPopup();
+			}           
+        ]]>
+    </mx:Script>
+		<mx:VBox width="100%" height="100%" borderStyle="solid" paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+				verticalAlign="middle" horizontalAlign="center">
+			<mx:Label text="Please verify associations for this TVC"/>	
+	        <mx:Label text="Currently associated members"/>
+	        <mx:DataGrid id="myGrid" dataProvider="{component.DataSources.AllDataSources.associationArrayCollection}" editable="true" width="100%"> 
+	            <mx:columns>
+	                <mx:DataGridColumn dataField="id" headerText="ID" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="fName" headerText="First Name" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="lName" headerText="Last Name" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="branchName" headerText="Branch" resizable="true" editable="false" textAlign="center"/>
+	                <mx:DataGridColumn dataField="relation" headerText="Relation" resizable="true" editable="true" textAlign="center"/>
+					<mx:DataGridColumn headerText="Delete Item" editable="false">
+						<mx:itemRenderer>
+							<mx:Component>
+								<mx:LinkButton label="Remove" click="outerDocument.deleteItem(event)"/>
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+				</mx:columns>       
+			</mx:DataGrid>  
+			<mx:ControlBar>
+				<mx:HBox width="100%" height="100%">
+					<mx:Button label="Abort" click="{parentDocument.stxHome.activityLauncher.taskLauncher.newReg.clearAssocPopup();}"/>
+					<mx:Spacer width="100%"/>				
+					<mx:Button label="Submit" click="submitRequest()"/>				
+				</mx:HBox>
+			</mx:ControlBar>
+		</mx:VBox>
+	</mx:Panel>	
+</mx:Canvas>

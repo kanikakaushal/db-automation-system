@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 	xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:compsHome="component.home.*"
+			xmlns:compsActivity="component.home.activityviews.*" xmlns:compsEvent="component.home.event.*"
+			xmlns:compsReports="component.home.reports.*">
+	<mx:Script>
+		<![CDATA[
+			
+			public function refreshChildDataProviders():void
+			{
+				if(activityViewStack.selectedIndex == 1)
+					avblActivities.updateDS();
+			}
+		]]>
+	</mx:Script>
+
+
+	<mx:Canvas width="100%" height="100%">
+		<mx:ViewStack id="activityViewStack" width="100%" height="100%" change="refreshChildDataProviders()">
+			<mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center" creationPolicy="queued" creationIndex="2">
+				<compsEvent:EventDetails width="50%" height="30%"/>
+				<compsActivity:AvailableActivities id="avblActivities" width="50%" height="70%" />
+			</mx:VBox>
+			<compsActivity:taskLauncher id="taskLauncher" creationPolicy="queued" creationIndex="1"/>
+			<compsReports:ReportsHome id="reportsLauncher" creationPolicy="queued" creationIndex="3"/>								
+		</mx:ViewStack>
+	</mx:Canvas>
+</mx:Canvas>

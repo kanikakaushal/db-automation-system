@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+			xmlns:actViews="component.home.activityviews.*" xmlns:compsReports="component.home.reports.*">
+	<mx:Script>
+		<![CDATA[
+			private function refreshChildPanes():void
+			{
+				if (taskViewStack.selectedIndex == 0)
+				{
+					subActivityTLTVC.repopulateTaskVBox();
+					TaskRTViewStack.selectedIndex = 0;
+				}
+			}
+			private function refreshRTChildPanes():void
+			{
+				if (TaskRTViewStack.selectedIndex == 1)
+				{
+					newReg.newRegClear();
+				}
+				if (TaskRTViewStack.selectedIndex == 2)
+				{
+					searchRegistration.searchClear();
+				}
+			}			
+		]]>
+	</mx:Script>
+	<mx:VBox id="aSubActivityLauncherVBox" width="100%" height="100%">
+        <mx:DividedBox direction="horizontal" width="100%" height="100%">
+				<mx:VBox id="avblTasks" width="20%" height="100%" borderStyle="solid"
+					verticalAlign="middle" horizontalAlign="left" creationPolicy="queued" creationIndex="2">					
+					<mx:ViewStack 	id="taskViewStack" width="100%" height="100%" creationPolicy="all" 
+									change="refreshChildPanes()">
+						<actViews:tasksTVC id="subActivityTLTVC"/>
+					</mx:ViewStack>								
+				</mx:VBox>
+			<mx:Canvas width="80%" height="100%" backgroundColor="white" borderStyle="solid" dropShadowEnabled="true">
+				<mx:ViewStack id="TaskRTViewStack" width="100%" height="100%" change="refreshRTChildPanes()">
+					<mx:Panel width="100%" height="100%"/>
+					<actViews:NewRegistration id="newReg"/>
+					<actViews:SearchRegistration id="searchRegistration"/>
+					<actViews:DisplayRegistrationRecord id="displayRegistrationRecord"/>
+					<actViews:EditRegistration id="editRegistration"/>
+				</mx:ViewStack>				
+			</mx:Canvas>        	
+        </mx:DividedBox>
+	</mx:VBox>	
+</mx:Canvas>

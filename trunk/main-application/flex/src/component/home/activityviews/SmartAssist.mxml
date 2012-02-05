@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow borderAlpha="1" title="Smart Assist" width="640" height="480"
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:ns1="nz.co.codec.flex.multicolumnform.*"
+	xmlns:degrafa="http://www.degrafa.com/2007"
+	xmlns:components="com.hillelcoren.components.*" 
+	horizontalAlign="center" verticalAlign="middle"
+	creationComplete="handleCreationComplete()" 
+	paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10" 
+	showCloseButton="true"  close="PopUpManager.removePopUp(this)">
+
+	<mx:Script source="ActionScript/SmartAssist.as"/>
+	<mx:Script>
+		<![CDATA[
+		import mx.validators.Validator;
+		import component.DataSources.AllDataSources;
+		import mx.events.ListEvent;
+		import mx.core.Application;
+        import mx.rpc.events.FaultEvent;
+		import mx.rpc.events.ResultEvent;
+		import mx.rpc.http.HTTPService;
+		import mx.controls.Alert;				
+
+		private var newReg:NewRegistration = new NewRegistration();
+			
+		[Bindable]
+		private var selectionCategory:String = new String();
+		[Bindable]
+		private	var selectionString:String = new String();
+		[Bindable]
+		private var selectedLicenseeName:String = new String();
+		
+		public function handleClick(evt:ListEvent):void
+		{
+			if(smartAssistTabNavigator.selectedChild.label == 'Sabha Quarters'){
+				selectionCategory = 'Sabha Quarters';
+				selectionString = evt.currentTarget.selectedItem.@quarter;
+				btnSmartAssistOK.enabled = true;
+			}
+			else if(smartAssistTabNavigator.selectedChild.label == 'Sadan'){
+				selectionCategory = 'Sadan';
+				selectionString = evt.currentTarget.selectedItem.@name;
+				btnSmartAssistOK.enabled = true;
+			}
+			else if(smartAssistTabNavigator.selectedChild.label == 'Private Quarters'){
+				selectionCategory = 'Private Quarters';
+				selectionString = evt.currentTarget.selectedItem.@number;
+				selectedLicenseeName = evt.currentTarget.selectedItem.@LicenseeName;
+				btnSmartAssistOK.enabled = true;
+			}			
+		}
+
+		private function handleCreationComplete():void {
+		    // Center the TitleWindow container 
+		    // over the control that created it.
+		    smartAssistTabNavigator.selectedIndex= component.DataSources.AllDataSources.smartAssistTargetTabToBeEnabled;
+		    PopUpManager.centerPopUp(this);
+		} 		
+		
+/*********************HTTP Service Calls ******************************/		
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+			
+			public function callService(url:String):void
+			{
+		            var requestObj:Object = new Object();
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "tvc/sadans.do":
+						break;
+						case "tvc/quarters.do":
+ 							requestObj.ColonyName = accoDetailsComboBox.selectedLabel;
+ 							requestObj.NoOfPeople = numPplQuarters.text;
+							service.request = requestObj;	
+						break;
+						case "tvc/privateQuarters.do":
+							requestObj.ColonyName = accoDetailsComboBox_PQ.selectedLabel;
+							service.request = requestObj;
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+	
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+	
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+	
+		    public function httpResult(event:ResultEvent):void
+		    {
+		    	switch (serviceCalled)
+		    	{
+						case "tvc/sadans.do":
+							component.DataSources.AllDataSources.sadanOccupancy = new XMLList(event.result);
+						break;
+						case "tvc/quarters.do":	
+							component.DataSources.AllDataSources.sabhaQtrVacancy = new XMLList(event.result);
+						break;
+						case "tvc/privateQuarters.do":
+							component.DataSources.AllDataSources.privateQtrVacancy = new XMLList(event.result);
+						break;						
+					default:
+						Alert.show("Unrecognized service called");        		
+		    	}
+			}
+/*********************HTTP Service Calls ******************************/		
+
+		private function processSelection():void{
+			if(smartAssistTabNavigator.selectedChild.label == 'Sabha Quarters'){
+				component.DataSources.AllDataSources.smartAssistAccoTypeIndex = 
+					component.DataSources.AllDataSources.accoType.accomodation.type.(@name == selectionCategory).@id;
+				component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = accoDetailsComboBox.selectedIndex;
+				component.DataSources.AllDataSources.smartAssistLAddressSelected = selectionString;
+				component.DataSources.AllDataSources.editRegLocalAddressString = selectionString;	
+//				component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;			
+			}
+			else if(smartAssistTabNavigator.selectedChild.label == 'Sadan'){
+				component.DataSources.AllDataSources.smartAssistAccoTypeIndex = 
+					component.DataSources.AllDataSources.accoType.accomodation.type.(@name == selectionCategory).@id;
+				component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = 
+					component.DataSources.AllDataSources.accoType.accomodation.type.(@name == selectionCategory).field.(@name == selectionString).@id;
+				component.DataSources.AllDataSources.smartAssistLAddressSelected = selectionString;
+				component.DataSources.AllDataSources.editRegLocalAddressString = selectionString;
+//				component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;				
+			}
+			else if(smartAssistTabNavigator.selectedChild.label == 'Private Quarters'){
+				component.DataSources.AllDataSources.smartAssistAccoTypeIndex = 
+					component.DataSources.AllDataSources.accoType.accomodation.type.(@name == selectionCategory).@id;
+				component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = accoDetailsComboBox_PQ.selectedIndex;
+				component.DataSources.AllDataSources.smartAssistLAddressSelected = selectionString;
+				component.DataSources.AllDataSources.licenseeDetails = selectedLicenseeName;
+				component.DataSources.AllDataSources.editRegLocalAddressString = selectionString;
+//				if(component.DataSources.AllDataSources.isAssociateSelected){	
+//					component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = true;
+//				}			
+			}			
+			if(adg != null)
+				if(adg.dataProvider != null) 
+					adg.dataProvider.removeAll();
+			if(adgSadan != null)
+				if(adgSadan.dataProvider != null) 
+					adgSadan.dataProvider.removeAll();
+			if(adg_PQ != null)
+				if(adg_PQ.dataProvider != null) 
+					adg_PQ.dataProvider.removeAll();
+					
+			accoDetailsComboBox.selectedIndex = -1;
+			accoDetailsComboBox.prompt = "Select One";
+			selectionCategory = "";
+			selectionString = "";		    
+			PopUpManager.removePopUp(this);
+		}
+		
+		private function clearAll():void{
+			selectionCategory = "";
+			selectionString = "";
+			component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = -1;
+			component.DataSources.AllDataSources.smartAssistLAddressSelected = "";
+			component.DataSources.AllDataSources.licenseeDetails = "";
+			PopUpManager.removePopUp(this);
+		}
+		
+		public function refreshChildDataProviders():void
+		{
+/* 			if(smartAssistTabNavigator.selectedIndex == 0)
+				do nothing */
+			if(smartAssistTabNavigator.selectedIndex == 1)
+				callService('tvc/sadans.do');
+			else if(smartAssistTabNavigator.selectedIndex == 2)
+				validateUs();				
+		}
+		
+		/*		In response to Bug # 16 */
+		private function validateUs() :void
+		{
+			if(smartAssistTabNavigator.selectedIndex == 0)
+				doSearch.enabled = (Validator.validateAll([numPplQuarterValidator]).length == 0);
+			else if(smartAssistTabNavigator.selectedIndex == 2)
+				doSearch_PQ.enabled = (Validator.validateAll([pqMohallaSelectedValidator]).length == 0);
+		}
+		/*		In response to Bug # 16 */
+		
+		/*		In response to Bug # 35 */
+		private function getVacancies_labelFunc(item:Object, column:DataGridColumn):String {			
+			var aTempNumber:Number;
+			aTempNumber = Number(item.@capacity) - (Number(item.@numMale) + Number(item.@numFemale) + Number(item.@numChild));
+			return aTempNumber.toString();
+		}
+		/*		In response to Bug # 35 */
+		]]>
+	</mx:Script>
+
+	<mx:TabNavigator id="smartAssistTabNavigator" borderStyle="solid" width="100%" height="100%" change="refreshChildDataProviders()"
+		paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+        <mx:VBox label="Sabha Quarters" horizontalAlign="center">
+			<ns1:MultiColumnForm numColumns="2">
+			    <ns1:MultiColumnFormItem id="accoDetails_SabhaQtr" label="Mohalla Name">
+			    	<mx:ComboBox id="accoDetailsComboBox" dataProvider="{component.DataSources.AllDataSources.accoType.accomodation.type.(@name == 'Sabha Quarters').field}"
+			    				labelField="@name" prompt="Select One" selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoDetailsIndex}"/>
+			    </ns1:MultiColumnFormItem>
+				<ns1:MultiColumnFormItem/>			    
+				<mx:HRule width="100%"/>	    
+			    <ns1:MultiColumnFormItem label="Number of People">
+					<components:PromptTextInput id="numPplQuarters" prompt="Enter Number" 
+						width="{accoDetailsComboBox.width}" change="{validateUs()}"/>
+			    </ns1:MultiColumnFormItem>    
+			</ns1:MultiColumnForm>
+			<mx:Button id="doSearch" click="{callService('tvc/quarters.do')}" label="Search" enabled="false"/>
+			<mx:DataGrid 	id="adg" width="100%" height="100%" 
+									dataProvider="{component.DataSources.AllDataSources.sabhaQtrVacancy.vacancies.vacancy}" 
+									fontSize="10" itemClick="handleClick(event)">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Vacancies" dataField="@count" textAlign="center"/>
+					<mx:DataGridColumn headerText="House No" dataField="@quarter" textAlign="center"/>
+				</mx:columns>
+			</mx:DataGrid>
+        </mx:VBox>
+       <mx:VBox label="Sadan" horizontalAlign="center">
+       		<mx:Label text="Sadan Wise Occupancy Details" textAlign="center" fontFamily="Verdana" fontWeight="bold" fontSize="12"/>
+			<mx:DataGrid 	id="adgSadan" width="100%" height="100%" 
+									dataProvider="{component.DataSources.AllDataSources.sadanOccupancy.sadans.sadan}" 
+									fontSize="10" itemClick="handleClick(event)">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Sadan Name" dataField="@name"/>
+					<mx:DataGridColumn headerText="Capacity" dataField="@capacity"/>					
+					<mx:DataGridColumn headerText="Male" dataField="@numMale"/>
+					<mx:DataGridColumn headerText="Female" dataField="@numFemale"/>
+					<mx:DataGridColumn headerText="Children" dataField="@numChild"/>
+					<mx:DataGridColumn headerText="Vacancies" labelFunction="getVacancies_labelFunc"/>
+					<mx:DataGridColumn headerText="Occupancy" itemRenderer="component.home.activityviews.ItemRenderers.DoubleBarRenderer"/>
+				</mx:columns>
+			</mx:DataGrid>
+        </mx:VBox>
+       <mx:VBox label="Private Quarters" horizontalAlign="center">
+       		<mx:Label text="Private Quarter Details" textAlign="center" fontFamily="Verdana" fontWeight="bold" fontSize="12"/>
+			<ns1:MultiColumnForm numColumns="1">
+			    <ns1:MultiColumnFormItem id="accoDetails_PrivateQtr" label="Mohalla Name">
+			    	<mx:ComboBox id="accoDetailsComboBox_PQ" dataProvider="{component.DataSources.AllDataSources.accoType.accomodation.type.(@name == 'Private Quarters').field}"
+			    				labelField="@name" prompt="Select One" selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoDetailsIndex}"
+			    				rowCount="10" change="{validateUs()}"/>
+			    </ns1:MultiColumnFormItem>    
+			</ns1:MultiColumnForm>
+			<mx:Button id="doSearch_PQ" click="{callService('tvc/privateQuarters.do')}" label="Search" enabled="false"/>
+			<mx:DataGrid 	id="adg_PQ" width="100%" height="100%" 
+									dataProvider="{component.DataSources.AllDataSources.privateQtrVacancy.PrivateQuarterDetails.PQEntry}" 
+									fontSize="10" itemClick="handleClick(event)">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Quarter No" dataField="@number" textAlign="center"/>
+					<mx:DataGridColumn headerText="Licensee Name" dataField="@LicenseeName" textAlign="center"/>
+				</mx:columns>
+			</mx:DataGrid>
+        </mx:VBox>        
+    </mx:TabNavigator>
+	<mx:ControlBar horizontalAlign="center">
+	    <mx:Button label="Cancel" click="clearAll();"/> 
+	    <mx:Button id="btnSmartAssistOK" label="OK" click="processSelection();" enabled="false"/>
+	</mx:ControlBar>
+	<mx:NumberFormatter precision="0" id="formatter"/>
+	<!-- In response to Bug # 16 -->	
+	<mx:NumberValidator id="numPplQuarterValidator" source="{numPplQuarters}" property="text" integerError="Enter value greater than 0" invalidCharError="Please enter a number"
+	        minValue="1" domain="int" lowerThanMinError="Enter value greater than 0"/>
+	<mx:NumberValidator id="pqMohallaSelectedValidator" source="{accoDetailsComboBox_PQ}" lowerThanMinError="This field is required." 
+    			property="selectedIndex" minValue="0" />	        
+	<!-- In response to Bug # 16 -->	        
+</mx:TitleWindow>

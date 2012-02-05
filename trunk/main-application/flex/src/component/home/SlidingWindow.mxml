@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+		<mx:Canvas id="menuBar" x="{0- (parent.width*0.5 - 40)}" y="{parent.height*0.2}" width="{parent.width*0.5}" height="{parent.height*0.6}" backgroundAlpha="0.25"
+					backgroundColor="#FDFCFC" borderStyle="solid" borderThickness="2" borderColor="#0296FD" dropShadowEnabled="true">
+		<mx:HBox width="100%" height="100%" verticalAlign="middle" backgroundColor="#FFFFFF">
+			<mx:Canvas width="85%" height="100%" >
+				<mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center" paddingBottom="10">
+					<mx:Accordion width="100%" height="100%">
+						<mx:Canvas label="Activities" width="100%" height="100%">
+							<mx:Tree id="activityTree" dataProvider="{myActivities}" labelField="@label" width="100%" height="100%"/>
+						</mx:Canvas>
+						<mx:Canvas label="Events" width="100%" height="100%">
+							<mx:AdvancedDataGrid id="adg" width="100%" height="100%" dataProvider="{new HierarchicalData(myEvents)}">
+							<mx:columns>
+								<mx:AdvancedDataGridColumn dataField="@label" headerText="Name" />
+								<mx:AdvancedDataGridColumn dataField="@data" headerText="Details" />
+								</mx:columns>
+							</mx:AdvancedDataGrid>						
+						</mx:Canvas>
+					</mx:Accordion>
+					<mx:Spacer height="15"/>
+					<mx:Button id="submitActivityEventSelectionBtn" label="Proceed" click="handleClick()"/>
+				</mx:VBox>
+			</mx:Canvas>
+			<mx:Canvas width="15%" height="100%">
+					<mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="right">
+					<mx:Image id="btn" mouseDown="moveMenuBox(event)" verticalAlign="middle" horizontalAlign="center">
+						<mx:source>../Resource/open.png</mx:source>
+					</mx:Image>
+				</mx:VBox>
+			</mx:Canvas>
+		</mx:HBox>
+		<mx:Script>		
+		<![CDATA[
+				private function moveMenuBox(e:MouseEvent):void{
+					parent.parent.addChildAt(menuBar, 1);
+					if(e.currentTarget.source == '../Resource/open.png')
+						 panelOut.play();
+					else
+						panelIn.play();
+				}
+			]]>
+		</mx:Script>
+	</mx:Canvas>
+		<!-- Relating the the sliding window -->		
+		<mx:Move id="panelOut" target="{menuBar}" xTo="0" effectEnd="btn.source='../Resource/close.png'"
+			duration="300"/>
+		<mx:Move id="panelIn" target="{menuBar}" xTo="{0- (parent.parent.width*0.5 - 40)}" effectEnd="btn.source='../Resource/open.png'"
+			duration="300"/>	
+</mx:Canvas>

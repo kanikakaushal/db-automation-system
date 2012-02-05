@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllDataSources;
+			import component.DataSources.AllImageResources;
+			import mx.collections.HierarchicalData;
+			import mx.events.ListEvent;
+			import mx.core.Application;
+        	import mx.containers.HBox;
+            import mx.containers.ControlBar;
+            import mx.containers.Panel;
+            import mx.containers.VBox;
+            import mx.controls.Button;
+            import mx.controls.Label;
+            import mx.controls.Spacer;
+            import mx.controls.Image;
+            import mx.managers.PopUpManager;
+            import mx.controls.Alert;
+            import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+            			
+			
+			private var myFilterOnBoolean:Boolean = false;
+			private var selectedEventID:String = new String();
+			
+			private var eventStatusChangeYesBtn:Button = new Button();
+			private var eventStatusChangeNoBtn:Button = new Button();
+
+			private var panel:Panel;
+
+/* These are used by SearchEventByDate to set the selected date ranges*/			
+			[Bindable]
+			public var fromDate:String = new String();
+			[Bindable]
+			public var toDate:String = new String();
+/* These are used by SearchEventByDate to set the selected date ranges*/
+			[Bindable]
+			public var currentDataGridSize:int = 0;		
+
+/*********************HTTP Service Calls ******************************/		
+
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+
+			public function clearDS():void
+			{
+	        	if(adg.dataProvider != null) adg.dataProvider.removeAll();				
+			}
+
+			public function clearAll():void{
+				if(adg.dataProvider != null) adg.dataProvider.removeAll();
+				searchEventStatusHBox.visible = false;
+				searchEventStatusLabel.text = "";
+				searchEventStatusLabel.visible = false;
+			}
+		
+			public function callService(url:String):void
+			{
+					var requestObj:Object = new Object();		            
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            switch (serviceCalled)
+					{
+						case "manage/events/search.do":
+							requestObj.SearchFromDate = component.DataSources.AllDataSources.selectPastEventFromDate;
+							requestObj.SearchToDate = component.DataSources.AllDataSources.selectPastEventToDate;
+							service.request = requestObj;
+						break;
+						case "manage/events/reactivate.do":
+							requestObj.EventId = selectedEventID;	
+							service.request = requestObj;						
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+
+        public function httpResult(event:ResultEvent):void
+        {
+        	switch (serviceCalled)
+        	{
+	        	case "manage/events/search.do":
+				    component.DataSources.AllDataSources.pastEvents = new XMLList(event.result);
+				    if(component.DataSources.AllDataSources.pastEvents.events.event.length() == 0){
+						if(currentDataGridSize > 1)
+						{
+							searchEventStatusHBox.visible = true;
+				    		searchEventStatusLabel.text = "Your search returned no results! Pls try a different date/range.";
+				    		searchEventStatusLabel.visible = true;
+				    		currentDataGridSize = 0;	
+						}
+				    }
+				break;				
+				case "manage/events/reactivate.do":
+					component.DataSources.AllDataSources.eventStatusChangeResponse = new XMLList(event.result);
+ 					if(component.DataSources.AllDataSources.eventStatusChangeResponse.message == 'Event reactivated successfully!!')
+					{
+						currentDataGridSize = adg.dataProvider.length;
+						callService("manage/events/search.do");
+					}
+				break;
+				default:
+					Alert.show("Unrecognized service called");
+        	}
+		}
+/*********************HTTP Service Calls ******************************/		
+					
+		public function handleClick(evt:ListEvent):void
+		{
+			if(evt.currentTarget.selectedItem.@fromDate != '') /* from Date field is != "" */
+			{
+				if((evt.columnIndex == 7) && (evt.currentTarget.selectedItem.@status == 'Terminated')){
+					clickAction();			
+				}
+			}
+		}		
+                
+         public function clickAction():void{
+         	createConfirmEventStatusChangePopup();
+         }
+         
+		private function getString(item:Object,column:DataGridColumn):String
+		{
+			if(item.@status == 'Terminated' || item.@status == 'Inactive')
+				return "Activate";
+			else
+				return "";
+		}            
+
+		private function createConfirmEventStatusChangePopup():void
+		{
+			var vb:VBox = new VBox();
+			var hb:HBox = new HBox();
+			var aLabel:Label = new Label();
+			var image:Image = new Image();
+
+			var cb:ControlBar = new ControlBar();
+		
+            eventStatusChangeYesBtn.label = "Yes";
+            eventStatusChangeYesBtn.addEventListener(MouseEvent.CLICK, eventStatusChangeYesBtnSelected);
+			eventStatusChangeNoBtn.label = "No";
+            eventStatusChangeNoBtn.addEventListener(MouseEvent.CLICK, eventStatusChangeNoBtnSelected);
+
+			cb.setStyle("horizontalAlign", "center");
+			cb.setStyle("verticalAlign", "middle");
+            cb.addChild(eventStatusChangeYesBtn);
+            cb.addChild(eventStatusChangeNoBtn);
+
+            panel = new Panel();
+            panel.setStyle("horizontalAlign", "center");
+            panel.setStyle("verticalAlign", "middle");
+            panel.width = 300;
+            panel.height = 180;
+
+			image.source = component.DataSources.AllImageResources.success;
+			aLabel.text = "Proceed to change status? " + Application.application.aHandleToAccount.myCurrEventID;
+			panel.title = "Event Status Change";
+
+			hb.setStyle("horizontalAlign", "center");
+			hb.setStyle("verticalAlign", "middle");					
+			hb.addChild(image);
+			hb.addChild(aLabel)
+			vb.setStyle("paddingBottom", 5);
+			vb.setStyle("paddingLeft", 5);
+			vb.setStyle("paddingRight", 5);
+			vb.setStyle("paddingTop", 5);
+			vb.setStyle("horizontalAlign", "center");
+			vb.setStyle("verticalAlign", "middle");				
+			vb.addChild(hb);										
+
+            panel.addChild(vb);
+            panel.addChild(cb);
+
+            PopUpManager.addPopUp(panel, this, true);
+            PopUpManager.centerPopUp(panel);
+        }
+        
+        private function eventStatusChangeYesBtnSelected(evt:MouseEvent):void {
+            PopUpManager.removePopUp(panel);
+			if(component.DataSources.AllDataSources.pastEvents.events.event[adg.selectedIndex].@status == "Terminated")
+			{
+				selectedEventID = component.DataSources.AllDataSources.pastEvents.events.event[adg.selectedIndex].@id;
+         		callService("manage/events/reactivate.do");
+   			}   			
+         	else
+         	{
+         		Alert.show("Unrecognized Event State");
+         		return;
+         	}
+        }
+        
+        private function eventStatusChangeNoBtnSelected(evt:MouseEvent):void {
+           PopUpManager.removePopUp(panel);
+        }
+        
+        private function closePopUp(evt:MouseEvent):void {
+            PopUpManager.removePopUp(panel);
+        }
+                                              
+		]]>
+	</mx:Script>
+		<mx:VBox width="100%" height="100%" borderStyle="solid"
+				paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+				verticalAlign="middle" horizontalAlign="center">
+			<mx:Spacer height="10%"/>
+			<mx:DataGrid 	id="adg" width="100%" height="100%" dataProvider="{component.DataSources.AllDataSources.pastEvents.events.event}" 
+							fontSize="10" itemClick="handleClick(event)">							
+				<mx:columns>
+					<mx:DataGridColumn dataField="@id" headerText="ID" textAlign="center"/>
+					<mx:DataGridColumn dataField="@name" headerText="Name" textAlign="center"/>
+					<mx:DataGridColumn dataField="@createdBy" headerText="Created By" textAlign="center"/>
+					<mx:DataGridColumn dataField="@community" headerText="Community" textAlign="center"/>
+					<mx:DataGridColumn dataField="@context" headerText="Context" textAlign="center"/>			
+					<mx:DataGridColumn dataField="@fromDate" headerText="From" textAlign="center"/>
+					<mx:DataGridColumn dataField="@status" headerText="Status" textAlign="center"/>
+	                <mx:DataGridColumn headerText="Change Status" dataField="@status" editable="false" resizable="true" textAlign="center" labelFunction="getString"/>
+	                </mx:columns>
+			</mx:DataGrid>
+		    <mx:HBox id="searchEventStatusHBox" width="100%" horizontalAlign="center" verticalAlign="middle" 
+		    			visible="false" borderStyle="solid" color="red">
+		    	<mx:Label id="searchEventStatusLabel" visible="false"/> 
+		    </mx:HBox> 
+	</mx:VBox>
+</mx:Canvas>

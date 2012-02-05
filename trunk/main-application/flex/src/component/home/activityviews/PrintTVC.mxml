@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="nz.co.codec.flex.multicolumnform.*" xmlns:BarCode="BarCode.*">
+	<mx:Script>
+		<![CDATA[
+        	import mx.printing.FlexPrintJobScaleType;
+        	import mx.core.IUIComponent;
+        	import mx.printing.FlexPrintJob;
+        	import component.DataSources.AllDataSources;
+        	import mx.controls.Alert;
+
+			private function onClickPrint(aTVCXML:XMLList):void {
+				Alert.show(aTVCXML.toXMLString());
+			}
+        	
+/*         	 private function onClickPrint(componentId:IUIComponent):void {
+                // Create an instance of the FlexPrintJob class.
+                var printJob:FlexPrintJob = new FlexPrintJob();
+
+                // Start the print job.
+                if (printJob.start() != true) return;
+
+                // Add the object to print. Do not scale it.
+                printJob.addObject(componentId, FlexPrintJobScaleType.NONE);
+
+                // Send the job to the printer.
+                printJob.send();
+            } */
+            
+            private function getNameString():String
+            {
+            	return component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@fName + " " 
+            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@mName + " " 
+            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@lName;
+            }
+            
+            private function getHomeAddressString():String
+            {
+            	return component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@homeAddress1 + ", " 
+            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@homeAddress2 + ", "
+            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@homeCity + ", "
+            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@homeState;
+            }
+            
+            private function getDBAddressString():String
+            {
+            	if(component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@accoType != "Sadan")
+	            	return component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@localAddress + ", " 
+	            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@colony;
+	            else
+	            	return "Room #: " + component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@localAddress + ", "
+	            			+ component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@sadan;	            	            	
+            }
+		]]>
+	</mx:Script>
+	<mx:VBox width="100%" height="100%" verticalAlign="middle" horizontalAlign="center"
+		 backgroundColor="white" dropShadowEnabled="true" borderStyle="solid">
+		 <mx:VBox verticalAlign="middle" horizontalAlign="center">
+			 <mx:VBox 	id="tvcCard" width="70%" height="70%" 
+			 			verticalAlign="middle" horizontalAlign="center" borderStyle="solid"
+			 			fontFamily="Verdana" fontSize="12">
+				<mx:Label text="Dayalbagh" textDecoration="underline" fontSize="16"/>
+				<mx:Label text="Temporary Visitor Information"/>
+								
+				<ns1:MultiColumnForm numColumns="2" paddingTop="20">
+				    <ns1:MultiColumnFormItem label="Visitor ID:" width="100%" colspan="2">			
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@id}" width="100"/>
+				    </ns1:MultiColumnFormItem>
+				    <mx:HRule width="100%"/>			    
+				    <ns1:MultiColumnFormItem label="Name:" colspan="2">			
+				        <mx:Label text="{getNameString()}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Home Address" colspan="2" width="100%">
+				        <mx:Label text="{getHomeAddressString()}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="DB Address:" colspan="2" width="100%">			
+				        <mx:Label text="{getDBAddressString()}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="From:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@fromDate}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="To:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@toDate}"/>
+				    </ns1:MultiColumnFormItem>
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="Dependant Details:" colspan="2" width="100%"/>
+				    <ns1:MultiColumnFormItem label="No. Male:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@depMaleCount}"/>
+					</ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="No. Female:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@depFemaleCount}"/>			        
+					</ns1:MultiColumnFormItem>
+					<ns1:MultiColumnFormItem label="Ages (Male):">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@depMaleAge}" width="100"/>
+				    </ns1:MultiColumnFormItem>	  
+				    <ns1:MultiColumnFormItem label="Ages (Female):">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.aTVCRegistration.registrations.registration.@textdepFemaleAge}" width="100"/>
+				    </ns1:MultiColumnFormItem>	  
+				</ns1:MultiColumnForm>
+			</mx:VBox>
+			<mx:ControlBar>
+				<mx:Button label="Cancel" click="{parentDocument.TaskRTViewStack.selectedIndex = 1}"/>
+				<mx:Spacer width="100%"/>
+				<mx:Button label="Print" click="{onClickPrint(component.DataSources.AllDataSources.aTVCRegistration.registrations.registration)}"/>
+			</mx:ControlBar>
+		 </mx:VBox>
+	</mx:VBox>		
+</mx:Canvas>

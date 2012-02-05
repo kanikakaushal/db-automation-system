@@ -1,0 +1,147 @@
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import component.Login;
+			import mx.controls.Button;
+			import mx.controls.Alert;
+			import mx.core.Application;
+			import component.DataSources.AllImageResources;
+
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;			
+
+			public var currActivityButtonClicked:String = new String();
+			private var imgRsc:AllImageResources = new AllImageResources();
+
+/*********************HTTP Service Calls ******************************/		
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+
+			public function updateDS():void
+			{
+				if(anActivityVBox != null)
+					anActivityVBox.removeAllChildren();
+				callService("activities/list.do");
+			}
+			
+			public function callService(url:String):void
+			{
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "activities/list.do":
+						break;
+						case "activities/start.do":
+							var requestObj:Object = new Object();
+							switch(this.currActivityButtonClicked)
+							{
+								case "TVC Registration":
+								requestObj.ActivityName = 'TVC';
+								requestObj.ActivityDescription = 'Management of Temporary visitor cards in Dayalbagh';
+								break;
+								case "Reports":
+								requestObj.ActivityName = 'Reports';
+								requestObj.ActivityDescription = 'Generate and view reports of various activities';
+								break;
+								default:							
+							}
+							service.request = requestObj;						
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+	
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+	
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+	
+		    public function httpResult(event:ResultEvent):void
+		    {
+		    	switch (serviceCalled)
+		    	{
+		        	case "activities/list.do":
+		        		component.DataSources.AllDataSources.myActivities = new XMLList(event.result);
+		        		populateActivityVBox();
+					break;
+					case "activities/start.do":
+						if(Application.application.aHandleToAccount.myCurrentApplicationActivityState == "TVC"){
+	 					parentDocument.activityViewStack.selectedIndex = 1;
+						parentDocument.taskLauncher.taskViewStack.selectedIndex = 0;
+						}
+						else if(Application.application.aHandleToAccount.myCurrentApplicationActivityState == "Reports"){
+	 					parentDocument.activityViewStack.selectedIndex = 2;
+/* 						parentDocument.taskLauncher.taskViewStack.selectedIndex = 1;
+						parentDocument.taskLauncher.TaskRTViewStack.selectedIndex = 6;	 */				
+						}
+					break;
+					default:
+						Alert.show("Unrecognized service called");        		
+		    	}
+			}
+/*********************HTTP Service Calls ******************************/		
+
+			private function buttonClickHandler(event:MouseEvent):void
+	        {
+				this.currActivityButtonClicked = (event.currentTarget).label.toString(); 
+				switch((event.currentTarget).label.toString())
+				{
+					case 'TVC Registration':
+					Application.application.aHandleToAccount.myCurrentApplicationActivityState = "TVC";
+					callService("activities/start.do");					
+					break;
+					case 'Reports':
+					Application.application.aHandleToAccount.myCurrentApplicationActivityState = "Reports";
+					callService("activities/start.do");					
+					break;
+					default:
+					Alert.show("Unidentified container:" + (event.currentTarget).label);
+				}
+	        }
+	        		
+			public function populateActivityVBox():void
+			{
+				for(var i:int=0; i<component.DataSources.AllDataSources.myActivities.activities.activity.length(); i++)
+				{
+	                var currentButton:Button = new Button();
+	                currentButton.width = 250;
+	                anActivityVBox.addChild(currentButton);
+					switch((component.DataSources.AllDataSources.myActivities.activities.activity[i].@label).toString())
+					{
+						case 'TVC':
+						currentButton.label = "TVC Registration";		/* Don't ask why!!! */
+						currentButton.setStyle("icon", component.DataSources.AllImageResources.tvc);
+						break;
+						case 'Reports':
+						currentButton.label = "Reports";
+						currentButton.setStyle("icon", component.DataSources.AllImageResources.reports);
+						break;				
+						default:
+						Alert.show("Unidentified container:" + (component.DataSources.AllDataSources.myActivities.activities.activity[i].@label));
+					}
+
+	                currentButton.addEventListener(MouseEvent.CLICK, buttonClickHandler);
+	                currentButton.setVisible(true);
+				}
+			}			
+		]]>
+	</mx:Script>
+
+	<mx:Panel 	width="100%" height="100%" title="Available Activities" fontFamily="Arial" fontSize="18" 
+				verticalAlign="middle" horizontalAlign="center">				
+		<mx:VBox id="anActivityVBox" width="100%" height="100%" fontSize="16" 
+		initialize="updateDS()" borderStyle="solid" verticalAlign="middle" horizontalAlign="center"/>
+	</mx:Panel>	
+</mx:Canvas>

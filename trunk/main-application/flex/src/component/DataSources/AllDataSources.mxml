@@ -1,0 +1,618 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300" >
+
+	<mx:Script>
+		<![CDATA[
+			import component.home.activityviews.EditTVCAssociations;
+			import mx.controls.Alert;
+			import mx.core.Application;
+			
+			import mx.collections.XMLListCollection;
+			import mx.collections.ArrayCollection;
+			import component.home.activityviews.TVCAssociations;
+			
+			[Bindable]
+			public static var timeOutInterval:int = 60;		/* Setting timeout interval to 30 minutes */
+			[Bindable]
+			public static var confirmInterval:int = 10;		/* Setting confirm interval to 10 seconds */			
+			[Bindable]
+			public static var welcomeString:String = new String();
+			[Bindable]
+ 			public static var currEventDetails:String  = new String();
+			[Bindable]
+			public static var myLoginDS:XMLList;
+			[Bindable]
+			public static var myEvents:XMLList;
+			[Bindable]
+			public static var selectPastEventFromDate:String;
+			[Bindable]
+			public static var selectPastEventToDate:String;			
+			[Bindable]
+			public static var pastEvents:XMLList;
+			[Bindable]
+			public static var eventCreateStatus:XMLList;
+			[Bindable]
+			public static var availableCommunityList:XMLList;
+			[Bindable]
+			public static var eventStatusChangeResponse:XMLList;
+			[Bindable]
+			public static var myActivities:XMLList;	
+			[Bindable]
+			public static var branchDetails:XMLList;
+			[Bindable]
+			public static var bcMemberDetails:XML;
+			[Bindable]
+			public static var licenseeDetails:String;
+			[Bindable]
+			public static var shouldLicenseeDetailsBeShown:Boolean = false;
+			[Bindable]
+			public static var shouldSmartAssistButtonBeEnabled:Boolean = false;									
+			[Bindable]
+			public static var aTVCRegistration:XMLList;
+			[Bindable]
+			public static var selectedTVCRegistrationEntry:XML;
+			[Bindable]
+			public static var isTVCAssociate:Boolean = false;
+			[Bindable]
+			public static var isMemberInitiated:Boolean = false;
+			[Bindable]
+			public static var isMemberJigyasu:Boolean = false;
+			[Bindable]
+			public static var isMemberUninitiated:Boolean = false;						
+			[Bindable]
+			public static var hostName:String;
+			[Bindable]
+			public static var aTVCAssocScreen:TVCAssociations = new TVCAssociations();
+			[Bindable]
+			public static var aListOfAssociations:XMLList;
+			[Bindable]
+			public static var validateAssocTVCID:XML;
+			[Bindable]
+			public static var anEditTVCAssocScreen:EditTVCAssociations = new EditTVCAssociations();
+			[Bindable]
+			public static var isTVCRegistrationSplPermission:Boolean = false;
+			[Bindable]
+			public static var isLicenseeDetailsAvailable:Boolean = false;
+			[Bindable]
+			public static var memberMohallaSadanIndex:int = 0;									
+			[Bindable]
+			public static var memberMohallaSadanName:String = "";									
+			[Bindable]
+			public static var editRegLocalAddressString:String = "";									
+//			[Bindable]
+//			public static var isAssociateSelected:Boolean = false;									
+
+
+			/* These are used for New Registration */			
+			
+			[Bindable]
+			public static var assocToPrimaryTVCRelation:XML = new XML(
+														<root>
+															<relationships>
+																<relationship label="Wife"/>
+																<relationship label="Spouse"/>
+																<relationship label="Father"/>
+																<relationship label="Mother"/>
+																<relationship label="Son"/>
+																<relationship label="Daughter"/>
+																<relationship label="Husband"/>
+																<relationship label="Sister"/>
+																<relationship label="Brother"/>
+																<relationship label="Grand son"/>
+																<relationship label="Grand daughter"/>
+																<relationship label="Son In Law"/>
+																<relationship label="Sister In Law"/>
+																<relationship label="Brother In Law"/>
+																<relationship label="Daughter In Law"/>																
+																<relationship label="Co brother"/>
+																<relationship label="Co sister"/>
+																<relationship label="Uncle"/>
+																<relationship label="Aunt"/>
+																<relationship label="Nephew"/>
+																<relationship label="Niece"/>
+																<relationship label="Friend"/>
+																<relationship label="Self"/>
+																<relationship label="Father In Law"/>
+																<relationship label="Mother In Law"/>
+																<relationship label="Grand father"/>
+																<relationship label="Grand mother"/>
+															</relationships>
+														</root>);
+			[Bindable]
+			public static var genderChoice:XML = new XML(
+														<root>
+															<gender>
+																<gender label="Male"/>
+																<gender label="Female"/>
+															</gender>
+														</root>);
+														
+			[Bindable]
+			public static var terminalID:XML = new XML(
+														<root>
+															<terminals>
+																<terminal id="Terminal 1"/>
+																<terminal id="Terminal 2"/>
+																<terminal id="Terminal 3"/>
+																<terminal id="Terminal 4"/>
+																<terminal id="Terminal 5"/>
+																<terminal id="Terminal 6"/>
+																<terminal id="Terminal 7"/>
+																<terminal id="Terminal 8"/>
+															</terminals>
+														</root>);
+														
+			[Bindable]
+			public static var initiatedStatus:XML = new XML(
+														<root>
+															<initiatedStatus>
+																<status label="Jigyasu"/>
+																<status label="Initiated"/>
+																<status label="Uninitiated"/>
+															</initiatedStatus>
+														</root>);
+
+			[Bindable]
+			public static var jigyasuRecommendation:XML = new XML(
+														<root>
+															<recommendations>
+																<recommendation label="Br. Secy"/>
+																<recommendation label="Secy RSS"/>
+																<recommendation label="JS-II"/>
+															</recommendations>
+														</root>);									
+			[Bindable]
+			public static var occupation:XML = new XML(
+														<root>
+															<occupation>
+																<category label="Employed"/>
+																<category label="Unemployed"/>
+																<category label="Housewife"/>
+																<category label="Student"/>
+															</occupation>
+														</root>);							
+			[Bindable]
+			public static var accoType:XML = new XML(
+													<root>
+														<accomodation>
+															<type id="0" name="Private Quarters">
+																<field id="0" name="Karyavir Nagar"/>
+																<field id="1" name="Saran Ashram Nagar"/>
+																<field id="2" name="Prem Nagar"/>
+																<field id="3" name="Vidyut Nagar"/>
+																<field id="4" name="Swet Nagar"/>
+																<field id="5" name="Soami Nagar"/>
+															</type>
+															<type id="1" name="Sabha Quarters">
+																<field id="0" name="Karyavir Nagar"/>
+																<field id="1" name="Saran Ashram Nagar"/>
+																<field id="2" name="Prem Nagar"/>
+																<field id="3" name="Vidyut Nagar"/>
+																<field id="4" name="Swet Nagar"/>
+																<field id="5" name="Soami Nagar"/>
+															</type>			
+															<type id="2" name="Sadan">
+																<field id="0" name="Dormitory"/>
+																<field id="1" name="Youth Hostel"/>
+																<field id="2" name="Yatri Sadan"/>
+																<field id="3" name="New Day Boarding School"/>
+																<field id="4" name="Old Day Boarding School"/>
+																<field id="5" name="Pilgrim Shed"/>
+																<field id="6" name="Old Exhibition Complex"/>		
+															</type>
+															<type id="3" name="Outside Dayalbagh">
+																<field id="0" name="Adan Bagh"/>
+																<field id="1" name="Radha Nagar"/>
+																<field id="2" name="Other"/>
+															</type>			
+														</accomodation>
+													</root>);
+
+			[Bindable]
+			public static var anAssociationArray:Array = new Array();	
+			[Bindable]
+			public static var assocCount:int = 0;
+ 			[Bindable]
+			public static var associationArrayCollection:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			public static var reportTypesTVC:XML = new XML(
+															<root>
+																<activityType label="TVC">
+																	<reportType id="DailyArrivals" label="Daily Arrivals"/>
+																</activityType>
+															</root>
+															);
+			[Bindable]
+ 			public static var arrivalsByTime:XMLList = new XMLList(
+															<root>
+																	<timeData time="2010-12-22 01:00" value="200"/>
+																	<timeData time="2010-12-22 02:00" value="300"/>
+																	<timeData time="2010-12-22 03:00" value="400"/>
+																	<timeData time="2010-12-22 04:00" value="500"/>
+																	<timeData time="2010-12-22 05:00" value="600"/>
+																	<timeData time="2010-12-22 06:00" value="700"/>
+																	<timeData time="2010-12-23 01:00" value="200"/>
+																	<timeData time="2010-12-23 02:00" value="300"/>
+																	<timeData time="2010-12-23 03:00" value="400"/>
+																	<timeData time="2010-12-23 04:00" value="500"/>
+																	<timeData time="2010-12-23 05:00" value="600"/>
+																	<timeData time="2010-12-23 06:00" value="700"/>
+															</root>
+															);
+															
+			[Bindable]
+			public static var bhandaraList:XML = new XML(
+														<root>
+															<bhandaraId id="0" name="Non-bhandara" />
+															<bhandaraId id="1" name="P.G. Huzur Sahabji Maharaj" />
+															<bhandaraId id="2" name="P.G. Huzur Mehtaji Maharaj" />
+															<bhandaraId id="3" name="P.G. Huzur Sarkar Sahab" />
+															<bhandaraId id="4" name="P.G. Huzur Lal Sahab" />
+															<bhandaraId id="5" name="P.G. Huzur Soamiji Maharaj" />
+															<bhandaraId id="6" name="P.G. Maharaj Sahab" />
+															<bhandaraId id="7" name="P.G. Huzur Maharaj" />
+														</root>);
+														
+			[Bindable]
+			public static var tvcReportList:XMLList;
+			[Bindable]
+			public static var sadanOccupancy:XMLList;
+			[Bindable]
+			public static var sabhaQtrVacancy:XMLList;
+			[Bindable]
+			public static var privateQtrVacancy:XMLList;			
+			[Bindable]
+			public static var smartAssistLAddressSelected:String = new String();
+			[Bindable]
+			public static var smartAssistAccoDetailsIndex:Number;
+			[Bindable]
+			public static var smartAssistAccoTypeIndex:Number;
+			[Bindable]
+			public static var smartAssistTargetTabToBeEnabled:Number = 0;
+ 			[Bindable]
+			public static var aSampleTVCRegistration:XML = new XML(
+															<root>
+																<registration id="1030202000210" fName="Raj" mName="Kumar" lName="Caprihan" 
+																		age="" sex="Male" occupation="" initStatus="Initiated" 
+																		region="DRSA" district="SEDSA" branch="Soami Nagar" 
+																		homeAddress1="Soami Nagar" homeAddress2="" 
+																		homeCity="Delhi" homeState="Delhi" homeCountry="India" 
+																		pincode="" permission="" permissionComments="" 
+																		accoType="Private Quarters" colony="Soami Nagar" sadan="" 
+																		localAddress="6/36" fromDate="12/23/2010" toDate="12/30/2010" 
+																		childCount="0" childrenAges="" 
+																		licenseeName="P.Bn. Sheila Caprihan" licenseeRelation="Son" 
+																		isDuplicate="false" isAssociate="false"/>
+															</root>);
+			[Bindable]
+			public static var aPrimaryTVCID:String = "";
+			[Bindable]
+			public static var hasPrimaryIDBeenFetched:Boolean = false;			
+/* 			[Bindable]
+			public static var aPrimaryTVCID:XML = new XML(
+															<root>
+																<primary id="123456"/>
+															</root>
+			); */															
+ 			/*[Bindable]
+			public static var selectedBhandaraIndex:Number = 0;*/
+			
+/* 			[Bindable]
+			public static var sadanOccupancy:XML = new XML(
+													<root>
+														<sadans>
+															<sadan name="Dormitory" capacity="600" numMale="100" numFemale="100" numChild="100" used="200" free="400"/>
+															<sadan name="Youth Hostel" capacity="600" numMale="100" numFemale="100" numChild="100"/>
+															<sadan name="Yatri Sadan" capacity="600" numMale="100" numFemale="100" numChild="100"/>
+															<sadan name="New Day Boarding School" capacity="600" numMale="100" numFemale="100" numChild="100"/>
+															<sadan name="Old Day Boarding School" capacity="600" numMale="100" numFemale="100" numChild="100"/>
+															<sadan name="Pligrim Shed" capacity="600" numMale="100" numFemale="100" numChild="100"/>
+															<sadan name="Old Exhibition Complex" capacity="600" numMale="100" numFemale="100" numChild="100"/>	
+														</sadans>
+													</root>); */																										
+		]]>
+	</mx:Script>
+
+
+	<!-- My XMLData Source Definitions -->
+	<mx:XML id="myAccount" xmlns="">
+	<root>
+		<account id="001001001115" name="Gaurav Caprihan"/>
+	</root>		
+	</mx:XML>
+
+	<mx:XML id="statesOfIndia">
+	<root>
+		<states>
+			<state name="Andaman and Nicobar Islands"/>
+			<state name="Andhra Pradesh"/>
+			<state name="Arunachal Pradesh"/>
+			<state name="Assam"/>
+			<state name="Bihar"/>
+			<state name="Chandigarh"/>
+			<state name="Chattishgarh"/>
+			<state name="Dadra and Nagar Haveli"/>
+			<state name="Daman and Diu"/>
+			<state name="Delhi"/>
+			<state name="Goa"/>
+			<state name="Gujarat"/>
+			<state name="Haryana"/>
+			<state name="Himachal Pradesh"/>
+			<state name="Jammu and Kashmir"/>
+			<state name="Jharkhand"/>
+			<state name="Karnataka"/>
+			<state name="Kerala"/>
+			<state name="Lakshadweep"/>
+			<state name="Madhya Pradesh"/>
+			<state name="Maharashtra"/>
+			<state name="Manipur"/>
+			<state name="Meghalaya"/>
+			<state name="Mizoram"/>
+			<state name="Nagaland"/>
+			<state name="Orissa"/>
+			<state name="Puducherry"/>
+			<state name="Punjab"/>
+			<state name="Rajasthan"/>
+			<state name="Sikkim"/>
+			<state name="Tamil Nadu"/>
+			<state name="Tripura"/>
+			<state name="Uttar Pradesh"/>
+			<state name="Uttaranchal"/>
+			<state name="West Bengal"/>
+			<state name="Not Applicable"/>
+		</states>			
+	</root>
+	</mx:XML>
+
+	<mx:XML id="branchesOfIndia">
+	<root>
+		<branches>
+			<branch id="1" branchName="Bangalore Branch Satsang" districtCode="1" districtName="Rayalseema" regionCode="1" regionName="ARSA"/>
+		</branches>
+	</root>
+	</mx:XML>
+
+
+	<mx:XML id="countriesOfWorld">
+	<root>
+		<countries>
+		  <country name="Afghanistan"/>
+		  <country name="Albania"/>
+		  <country name=">Algeria"/>
+		  <country name="American Samoa"/>
+		  <country name="Andorra"/>
+		  <country name="Angola"/>
+		  <country name="Anguilla"/>
+		  <country name="Antarctica"/>
+		  <country name="Antigua And Barbuda"/>
+		  <country name="Argentina"/>
+		  <country name="Armenia"/>
+		  <country name="Aruba"/>
+		  <country name="Australia"/>
+		  <country name="Austria"/>
+		  <country name="Azerbaijan"/>
+		  <country name="Bahamas"/>
+		  <country name="Bahrain"/>
+		  <country name="Bangladesh"/>
+		  <country name="Barbados"/>
+		  <country name="Belarus"/>
+		  <country name="Belgium"/>
+		  <country name="Belize"/>
+		  <country name="Benin"/>
+		  <country name="Bermuda"/>
+		  <country name="Bhutan"/>
+		  <country name="Bolivia"/>
+		  <country name="Bosnia And Herzegovina"/>
+		  <country name="Botswana"/>
+		  <country name="Bouvet Island"/>
+		  <country name="Brazil"/>
+		  <country name="Brunei Darussalam"/>
+		  <country name="Bulgaria"/>
+		  <country name="Burkina Faso"/>
+		  <country name="Burundi"/>
+		  <country name="Cambodia"/>
+		  <country name="Cameroon"/>
+		  <country name="Canada"/>
+		  <country name="Cape Verde"/>
+		  <country name="Cayman Islands"/>
+		  <country name="Central African Republic"/>
+		  <country name="Chad"/>
+		  <country name="Chile"/>
+		  <country name="China"/>
+		  <country name="Christmas Island"/>
+		  <country name="Cocos (Keeling) Islands"/>
+		  <country name="Colombia"/>
+		  <country name="Comoros"/>
+		  <country name="Congo"/>
+		  <country name="Cook Islands"/>
+		  <country name="Costa Rica"/>
+		  <country name="Cote D'Ivoire"/>
+		  <country name="Croatia (Local Name: Hrvatska)"/>
+		  <country name="Cuba"/>
+		  <country name="Cyprus"/>
+		  <country name="Czech Republic"/>
+		  <country name="Denmark"/>
+		  <country name="Djibouti"/>
+		  <country name="Dominica"/>
+		  <country name="Dominican Republic"/>
+		  <country name="Ecuador"/>
+		  <country name="Egypt"/>
+		  <country name="El Salvador"/>
+		  <country name="Equatorial Guinea"/>
+		  <country name="Eritrea"/>
+		  <country name="Estonia"/>
+		  <country name="Ethiopia"/>
+		  <country name="Falkland Islands (Malvinas)"/>
+		  <country name="Faroe Islands"/>
+		  <country name="Fiji"/>
+		  <country name="Finland"/>
+		  <country name="France"/>
+		  <country name="France, Metropolitan"/>
+		  <country name="French Guiana"/>
+		  <country name="French Polynesia"/>
+		  <country name="French Southern Territories"/>
+		  <country name="Gabon"/>
+		  <country name="Gambia"/>
+		  <country name="Georgia"/>
+		  <country name="Germany"/>
+		  <country name="Ghana"/>
+		  <country name="Gibraltar"/>
+		  <country name="Greece"/>
+		  <country name="Greenland"/>
+		  <country name="Grenada"/>
+		  <country name="Guadeloupe"/>
+		  <country name="Guam"/>
+		  <country name="Guatemala"/>
+		  <country name="Guinea"/>
+		  <country name="Guinea-Bissau"/>
+		  <country name="Guyana"/>
+		  <country name="Haiti"/>
+		  <country name="Heard Island &amp; Mcdonald Islands"/>
+		  <country name="Honduras"/>
+		  <country name="Hong Kong"/>
+		  <country name="Hungary"/>
+		  <country name="Iceland"/>
+		  <country name="India"/>
+		  <country name="Indonesia"/>
+		  <country name="Iran, Islamic Republic Of"/>
+		  <country name="Iraq"/>
+		  <country name="Ireland"/>
+		  <country name="Israel"/>
+		  <country name="Italy"/>
+		  <country name="Jamaica"/>
+		  <country name="Japan"/>
+		  <country name="Jordan"/>
+		  <country name="Kazakhstan"/>
+		  <country name="Kenya"/>
+		  <country name="Kiribati"/>
+		  <country name="Korea, Democratic People'S Republic Of"/>
+		  <country name="Korea, Republic Of"/>
+		  <country name="Kuwait"/>
+		  <country name="Kyrgyzstan"/>
+		  <country name="Lao People'S Democratic Republic"/>
+		  <country name="Latvia"/>
+		  <country name="Lebanon"/>
+		  <country name="Lesotho"/>
+		  <country name="Liberia"/>
+		  <country name="Libyan Arab Jamahiriya"/>
+		  <country name="Liechtenstein"/>
+		  <country name="Lithuania"/>
+		  <country name="Luxembourg"/>
+		  <country name="Macau"/>
+		  <country name="Macedonia, The Former Yugoslav Republic Of"/>
+		  <country name="Madagascar"/>
+		  <country name="Malawi"/>
+		  <country name="Malaysia"/>
+		  <country name="Maldives"/>
+		  <country name="Mali"/>
+		  <country name="Malta"/>
+		  <country name="Marshall Islands"/>
+		  <country name="Martinique"/>
+		  <country name="Mauritania"/>
+		  <country name="Mauritius"/>
+		  <country name="Mayotte"/>
+		  <country name="Mexico"/>
+		  <country name="Micronesia, Federated States Of"/>
+		  <country name="Moldova, Republic Of"/>
+		  <country name="Monaco"/>
+		  <country name="Mongolia"/>
+		  <country name="Montserrat"/>
+		  <country name="Morocco"/>
+		  <country name="Mozambique"/>
+		  <country name="Myanmar"/>
+		  <country name="Namibia"/>
+		  <country name="Nauru"/>
+		  <country name="Nepal"/>
+		  <country name="Netherlands"/>
+		  <country name="Netherlands Antilles"/>
+		  <country name="New Caledonia"/>
+		  <country name="New Zealand"/>
+		  <country name="Nicaragua"/>
+		  <country name="Niger"/>
+		  <country name="Nigeria"/>
+		  <country name="Niue"/>
+		  <country name="Norfolk Island"/>
+		  <country name="Northern Mariana Islands"/>
+		  <country name="Norway"/>
+		  <country name="Oman"/>
+		  <country name="Pakistan"/>
+		  <country name="Palau"/>
+		  <country name="Panama"/>
+		  <country name="Papua New Guinea"/>
+		  <country name="Paraguay"/>
+		  <country name="Peru"/>
+		  <country name="Philippines"/>
+		  <country name="Pitcairn"/>
+		  <country name="Poland"/>
+		  <country name="Portugal"/>
+		  <country name="Puerto Rico"/>
+		  <country name="Qatar"/>
+		  <country name="Reunion"/>
+		  <country name="Romania"/>
+		  <country name="Russian Federation"/>
+		  <country name="Rwanda"/>
+		  <country name="Saint Helena"/>
+		  <country name="Saint Kitts And Nevis"/>
+		  <country name="Saint Lucia"/>
+		  <country name="Saint Pierre And Miquelon"/>
+		  <country name="Saint Vincent And The Grenadines"/>
+		  <country name="Samoa"/>
+		  <country name="San Marino"/>
+		  <country name="Sao Tome And Principe"/>
+		  <country name="Saudi Arabia"/>
+		  <country name="Senegal"/>
+		  <country name="Seychelles"/>
+		  <country name="Sierra Leone"/>
+		  <country name="Singapore"/>
+		  <country name="Slovakia (Slovak Republic)"/>
+		  <country name="Slovenia"/>
+		  <country name="Solomon Islands"/>
+		  <country name="Somalia"/>
+		  <country name="South Africa"/>
+		  <country name="Spain"/>
+		  <country name="Sri Lanka"/>
+		  <country name="Sudan"/>
+		  <country name="Suriname"/>
+		  <country name="Svalbard And Jan Mayen Islands"/>
+		  <country name="Swaziland"/>
+		  <country name="Sweden"/>
+		  <country name="Switzerland"/>
+		  <country name="Syrian Arab Republic"/>
+		  <country name="Taiwan, Province Of China"/>
+		  <country name="Tajikistan"/>
+		  <country name="Tanzania, United Republic Of"/>
+		  <country name="Thailand"/>
+		  <country name="Togo"/>
+		  <country name="Tokelau"/>
+		  <country name="Tonga"/>
+		  <country name="Trinidad And Tobago"/>
+		  <country name="Tunisia"/>
+		  <country name="Turkey"/>
+		  <country name="Turkmenistan"/>
+		  <country name="Turks And Caicos Islands"/>
+		  <country name="Tuvalu"/>
+		  <country name="Uganda"/>
+		  <country name="Ukraine"/>
+		  <country name="United Arab Emirates"/>
+		  <country name="United Kingdom"/>
+		  <country name="United States of America"/>
+		  <country name="United States Minor Outlying Islands"/>
+		  <country name="Uruguay"/>
+		  <country name="Uzbekistan"/>
+		  <country name="Vanuatu"/>
+		  <country name="Vatican City State (Holy See)"/>
+		  <country name="Venezuela"/>
+		  <country name="Viet Nam"/>
+		  <country name="Virgin Islands (British)"/>
+		  <country name="Virgin Islands (U.S.)"/>
+		  <country name="Wallis And Futuna Islands"/>
+		  <country name="Western Sahara"/>
+		  <country name="Yemen"/>
+		  <country name="Yugoslavia"/>
+		  <country name="Zaire"/>
+		  <country name="Zambia"/>
+		  <country name="Zimbabwe"/>
+		</countries>
+	</root>
+	</mx:XML>	
+</mx:Canvas>

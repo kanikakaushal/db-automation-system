@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import component.DataSources.AllDataSources;
+
+			public function myParseFunction(s:String):Date {
+			   var sDate:String = s.substring(0,s.indexOf(" "));
+			   var sTime:String = s.substring(s.indexOf(" "));
+			   var aDate:Array = sDate.split("-");
+			   var aTime:Array = sTime.split(":");
+			   var aVarDate:Date = new Date(aDate[0], (aDate[1]*1-1), aDate[2], aTime[0],aTime[1]);
+			   return aVarDate;
+			 }
+	]]>
+	</mx:Script>
+     <mx:LineChart 	id="myChart" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.arrivalsByTime.timeData)}" 
+     				showDataTips="true">
+        <mx:horizontalAxis>
+           <mx:DateTimeAxis dataUnits="days" displayLocalTime="true" parseFunction="{myParseFunction}"/>
+        </mx:horizontalAxis>
+        <mx:series>
+           <mx:LineSeries yField="@value" xField="@time"/>
+        </mx:series>
+     </mx:LineChart>
+</mx:Canvas>

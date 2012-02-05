@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:ns1="nz.co.codec.flex.multicolumnform.*">
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllDataSources;
+        	import mx.controls.Alert;
+        	import mx.core.Application;			
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			import mx.containers.Panel;
+			import mx.controls.Image;
+			import mx.managers.PopUpManager;
+
+/*********************HTTP Service Calls ******************************/		
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+			private	var panel:Panel;	        
+
+			public function preProcessFields():void
+			{
+				if(component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@licenseeName != "")
+					lblLicenseeName.visible = true;
+				else
+					lblLicenseeName.visible = false;
+				if(component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@licenseeRelation != "")
+					lblLicenseeRelation.visible = true;
+				else
+					lblLicenseeRelation.visible = false;					 
+			}
+			
+			public function callService(url:String):void
+			{
+		            var requestObj:Object = new Object();
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "tvc/print.do":
+							var aTempXML:XML = new XML();
+							aTempXML = component.DataSources.AllDataSources.selectedTVCRegistrationEntry;
+							requestObj.TerminalID = Application.application.aHandleToAccount.terminalID;
+							requestObj.TvcId = (aTempXML.@id).toString();
+							requestObj.IsAssociate = (aTempXML.@isAssociate).toString();
+							if(radioButtonPrintCard.selected)
+								requestObj.PrintLabelOrCard = "Card";
+							else if(radioButtonPrintEnablingStamp.selected)
+								requestObj.PrintLabelOrCard = "Label";
+							service.request = requestObj;		
+						break;						
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+	
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+	
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	        }
+	
+		    public function httpResult(event:ResultEvent):void
+		    {
+		    	switch (serviceCalled)
+		    	{
+					case "tvc/duplicate.do":
+					break;
+					case "tvc/print.do":
+						createPopupPanelElements();					
+	        		break;
+					default:
+						Alert.show("Unrecognized service called");        		
+		    	}
+			}
+/*********************HTTP Service Calls ******************************/					
+			private function createPopupPanelElements():void
+			{
+				var vb:VBox = new VBox();
+				var hb:HBox = new HBox();
+				var aLabel:Label = new Label();
+				var image:Image = new Image();
+	
+				var cb:ControlBar = new ControlBar();
+				var b1:Button = new Button();
+			
+                b1.label = "OK";
+                b1.addEventListener(MouseEvent.CLICK, closePopUp);
+
+				cb.setStyle("horizontalAlign", "center");
+				cb.setStyle("verticalAlign", "middle");
+                cb.addChild(b1);
+
+                panel = new Panel();
+                panel.setStyle("horizontalAlign", "center");
+                panel.setStyle("verticalAlign", "middle");
+                panel.setStyle("backgroundAlpha", "1");
+                panel.width = 500;
+                panel.height = 180;
+
+				image.source = component.DataSources.AllImageResources.success;
+				aLabel.text = 	"Duplicate Card/Label Printed for TVC ID # " + component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@id;
+				panel.title = "Print Duplicate TVC Registration";
+
+				hb.setStyle("horizontalAlign", "center");
+				hb.setStyle("verticalAlign", "middle");					
+				hb.addChild(image);
+				hb.addChild(aLabel)
+				vb.setStyle("paddingBottom", 5);
+				vb.setStyle("paddingLeft", 5);
+				vb.setStyle("paddingRight", 5);
+				vb.setStyle("paddingTop", 5);
+				vb.setStyle("horizontalAlign", "center");
+				vb.setStyle("verticalAlign", "middle");				
+				vb.addChild(hb);										
+
+                panel.addChild(vb);
+                panel.addChild(cb);
+
+                PopUpManager.addPopUp(panel, this, true);
+                PopUpManager.centerPopUp(panel);
+            }
+
+            private function closePopUp(evt:MouseEvent):void {
+                PopUpManager.removePopUp(panel);
+            }
+		]]>
+	</mx:Script>
+	<mx:Panel 	width="100%" height="100%" title="Temporary Visitor Details" horizontalAlign="center" verticalAlign="middle"
+				 paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">	    
+		<mx:VBox height="80%" width="100%" horizontalAlign="center" verticalAlign="middle" borderStyle="solid">				 
+				<ns1:MultiColumnForm numColumns="3" width="100%" height="100%">
+				    <ns1:MultiColumnFormItem label="TVC ID:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@id}" width="100%"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem id="lblPrimaryTVCId" label="Primary ID:" 
+				    						visible="{component.DataSources.AllDataSources.hasPrimaryIDBeenFetched}">
+				    	<mx:Label id="primaryTVCIDDetail" text="{component.DataSources.AllDataSources.aPrimaryTVCID}" 
+				    						visible="{component.DataSources.AllDataSources.hasPrimaryIDBeenFetched}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>
+				    <ns1:MultiColumnFormItem label="First Name:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@fName}" width="100%"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Middle Name:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@mName}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Last Name:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@lName}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Age:" >
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@age}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Occupation:" >
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@occupation}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Recommendation:" >
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@recommendationType}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Gender:">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@sex}"/>
+				    </ns1:MultiColumnFormItem>			    
+				    <ns1:MultiColumnFormItem label="Init. Status:">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@initStatus}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="Branch:">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@branch}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="District:">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@district}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Region:">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@region}"/>
+				    </ns1:MultiColumnFormItem>
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="Home Address" width="100%">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@hAddress}" width="100%"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="City:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@homeCity}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>			    
+				    <ns1:MultiColumnFormItem label="Pin Code:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@pincode}"/>
+				    </ns1:MultiColumnFormItem>			    
+				    <ns1:MultiColumnFormItem label="State:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@homeState}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Country:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@homeCountry}"/>
+				    </ns1:MultiColumnFormItem>				    			    
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="Permission Category">
+				    	<mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@permission}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Eligibility Details">
+				    	<mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@permissionComments}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="Accomodation Type:">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@accoType}"/>			        
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="Mohalla/Sadan Name:">
+				    	<mx:Label text="{component.DataSources.AllDataSources.memberMohallaSadanName}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>
+				    <ns1:MultiColumnFormItem label="Local Address:" width="100%">			
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@localAddress}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem id="lblLicenseeName" label="Licensee Name:" 
+				    	visible="{component.DataSources.AllDataSources.isLicenseeDetailsAvailable}" width="100%">
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@licenseeName}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem id="lblLicenseeRelation" label="Relation With Licensee:" 
+				    		visible="{component.DataSources.AllDataSources.isLicenseeDetailsAvailable}" width="100%">	
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@licenseeRelation}"/>
+				    </ns1:MultiColumnFormItem>
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="From:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@fromDate}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem label="To:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@toDate}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>			    		
+				    <mx:HRule width="100%"/>
+				    <ns1:MultiColumnFormItem label="No. Children:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@childCount}"/>			        			    
+				    </ns1:MultiColumnFormItem>
+					<ns1:MultiColumnFormItem label="Ages:">			    		
+				        <mx:Label text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@childrenAges}"/>
+				    </ns1:MultiColumnFormItem>
+				    <ns1:MultiColumnFormItem/>
+				    <mx:HRule width="100%"/>
+					<ns1:MultiColumnFormItem>
+						<mx:RadioButtonGroup id="radioGroup" selectedValue="0"/>
+						<mx:RadioButton id="radioButtonPrintCard" label="Print TVC" group="{radioGroup}" selected="false" enabled="false"/>
+					</ns1:MultiColumnFormItem>											
+					<ns1:MultiColumnFormItem>
+						<mx:RadioButton id="radioButtonPrintEnablingStamp" label="Print Enabling Stamp" group="{radioGroup}" selected="true"/>							
+					</ns1:MultiColumnFormItem>											
+				    <ns1:MultiColumnFormItem/>
+				</ns1:MultiColumnForm>				
+				<mx:ControlBar>
+					<mx:HBox width="100%" height="100%">
+					<mx:Button label="Print Duplicate TVC" click="callService('tvc/print.do')"/>					
+					</mx:HBox>
+				</mx:ControlBar>
+			</mx:VBox>						
+		</mx:Panel>	
+</mx:Canvas>

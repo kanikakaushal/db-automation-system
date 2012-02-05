@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" >
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Button;
+			import mx.controls.Alert;
+			import component.DataSources.AllDataSources;
+			import component.DataSources.AllImageResources;
+			import mx.core.Application;
+					
+			private function buttonClickHandler(event:MouseEvent):void
+	        {
+				switch((event.currentTarget).label.toString())
+				{
+					case 'New Registration':
+					Application.application.aHandleToAccount.currentApplicationSubActivityState = "TVC_NewReg";
+					parentDocument.TaskRTViewStack.selectedIndex = 1;
+					break;
+					case 'Search Registration':
+					Application.application.aHandleToAccount.currentApplicationSubActivityState = "TVC_SearchReg";
+					parentDocument.TaskRTViewStack.selectedIndex = 2;				
+					break;					
+					case 'Edit Registration':
+					Application.application.aHandleToAccount.currentApplicationSubActivityState = "TVC_EditReg";
+					parentDocument.TaskRTViewStack.selectedIndex = 2;			
+					break;
+/* 					case 'Add Associations':
+					Application.application.aHandleToAccount.currentApplicationSubActivityState = "TVC_AddAssoc";					
+					parentDocument.TaskRTViewStack.selectedIndex = 6;
+					break;	 */			
+					default:
+					Alert.show("Unidentified container:" + (event.currentTarget).label);
+				}
+
+	        }
+	        
+			public function populateActivityVBox():void
+			{
+				var currActivityButtonClicked:String = new String();
+				var createdAssociationsButton:Boolean = false;
+				var aVar:XMLList = component.DataSources.AllDataSources.myActivities.activities.activity.(@label=='TVC')
+				for each(var node:XML in aVar.children())
+				{
+	                var currentButton:Button = new Button();
+	                currentButton.label = node.@label;
+	                currentButton.width = 190;
+	                currentButton.executeBindings(true);
+					switch(node.@label.toString())
+					{
+						case 'New Registration':
+						currentButton.setStyle("icon", component.DataSources.AllImageResources.newreg);
+						taskVBox.addChild(currentButton);
+						break;
+						case 'Search Registration':
+						currentButton.setStyle("icon", component.DataSources.AllImageResources.search);
+	                	taskVBox.addChild(currentButton);						
+						break;						
+						case 'Edit Registration':
+						currentButton.setStyle("icon", component.DataSources.AllImageResources.vmreg);
+	                	taskVBox.addChild(currentButton);						
+						break;
+/* 						case 'Add Associations':
+						currentButton.label = "Add Associations";
+						currentButton.setStyle("icon", component.DataSources.AllImageResources.associate);
+						taskVBox.addChild(currentButton);								
+						break;	 */					
+						default:
+					}
+	                currentButton.addEventListener(MouseEvent.CLICK, buttonClickHandler);
+	                currentButton.setVisible(true);	                
+				}
+			}
+			
+			public function repopulateTaskVBox():void
+			{
+				taskVBox.removeAllChildren();
+				populateActivityVBox();
+			}
+		]]>
+	</mx:Script>
+	<mx:Canvas id="subActTLViewCvs" width="100%" height="100%" includeInLayout="true">
+		<mx:Panel title="Available Tasks" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" fontSize="16" fontFamily="Arial">
+			<mx:VBox id="taskVBox" initialize="populateActivityVBox()" fontSize="12" height="100%" width="100%" verticalAlign="middle" horizontalAlign="center"/>			
+		</mx:Panel>
+	</mx:Canvas>
+</mx:Canvas>

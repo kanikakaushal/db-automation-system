@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 	xmlns:mx="http://www.adobe.com/2006/mxml" 
+			xmlns:ns1="nz.co.codec.flex.multicolumnform.*" xmlns:components="com.hillelcoren.components.*"
+			xmlns:CustomClasses="CustomClasses.*">
+	<mx:Panel width="100%" height="100%" layout="absolute" title="New Registration">
+
+<!-- Include the ActionScript File containing all the Functions -->		
+		<mx:Script source="ActionScript/NewRegistration.as"/>
+		<mx:Script source="ActionScript/SmartAssist.as"/>
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import mx.core.Application;
+		]]>
+	</mx:Script>
+		
+	<mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+		<mx:VBox height="10%" width="100%" verticalAlign="middle" horizontalAlign="center">
+			<mx:HBox>
+				<mx:VBox height="100%" width="50%" verticalAlign="middle" horizontalAlign="left" borderStyle="solid"
+						paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+					<mx:RadioButtonGroup id="radioGroup" selectedValue="0"/>
+					<mx:RadioButton id="radioButtonIsPrimary" label="Primary TVC" group="{radioGroup}" selected="true" click="handlePrimaryRadioButtonClick();"/>
+					<mx:HBox verticalAlign="middle" width="100%">
+				        <mx:RadioButton id="radioButtonIsAssociate" label="Associate TVC" group="{radioGroup}" width="30%"  click="handleAssociateRadioButtonClick();"/>
+						<mx:Spacer width="50%"/>
+						<mx:HBox id="aRelationHBox" visible="{radioButtonIsAssociate.selected}" verticalAlign="middle" width="70%">
+							<mx:Label text="Relation to primary"/>
+							<components:AutoComplete 	id="assocToPrimaryRel" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
+														labelField="@label" selectedItemStyleName="none" prompt="Relation" allowNewValues="true" change="validateUs()"/>				
+							<mx:Spacer width="100%"/>
+							<mx:Label text="Associations Recorded: {component.DataSources.AllDataSources.assocCount}"/>
+						</mx:HBox>
+					</mx:HBox>
+				</mx:VBox>
+				<mx:VBox height="100%" width="50%" verticalAlign="middle" horizontalAlign="left" borderStyle="solid"
+							paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+					<mx:CheckBox label="Barcoded Member ID Available" id="isBarCodedTVCAvailable" click="setFocusOnTextBox()" change="resetBCEntries()"/>
+			    <ns1:MultiColumnFormItem label="Member ID" visible="{isBarCodedTVCAvailable.selected}">			
+			        <mx:TextInput id="bcMemberID" enter="getMemberDetails()" width="{cellWidth}" visible="{isBarCodedTVCAvailable.selected}" change=""/>
+			    </ns1:MultiColumnFormItem>			    
+				</mx:VBox>
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox height="90%" width="100%" horizontalAlign="center" verticalAlign="middle" creationComplete="resetForm()" borderStyle="solid">
+			<ns1:MultiColumnForm numColumns="3">
+			    <ns1:MultiColumnFormItem label="First Name:">			
+			        <components:PromptTextInput id="fName" prompt="First name" updateComplete="{validateUs()}" width="{cellWidth}"
+			        	text="{component.DataSources.AllDataSources.bcMemberDetails.member.@firstName}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem label="Middle Name:">			
+			        <components:PromptTextInput id="mName" prompt="Middle name" width="{cellWidth}" updateComplete="validateUs()"
+			        	text="{component.DataSources.AllDataSources.bcMemberDetails.member.@middleName}"/>
+			    </ns1:MultiColumnFormItem>			    
+			    <ns1:MultiColumnFormItem label="Last Name:">			
+			        <components:PromptTextInput id="lName" prompt="Last name" width="{cellWidth}" updateComplete="validateUs()"
+			        	text="{component.DataSources.AllDataSources.bcMemberDetails.member.@lastName}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem label="Gender:">
+					<components:AutoComplete 	id="genderType" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.genderChoice.gender.gender)}" 
+												labelField="@label" selectedItemStyleName="none" prompt="Select" width="{cellWidth}" updateComplete="validateUs()"
+												selectedItem="{component.DataSources.AllDataSources.genderChoice.gender.gender.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@gender)}"/>
+			    </ns1:MultiColumnFormItem>			    
+			    <ns1:MultiColumnFormItem label="Init. Status:">
+					<components:AutoComplete 	id="initStatus" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.initiatedStatus.initiatedStatus.status)}" 
+												labelField="@label" selectedItemStyleName="none" prompt="Select" searchChange="checkStatus()" width="{cellWidth}"
+												selectedItem="{component.DataSources.AllDataSources.initiatedStatus.initiatedStatus.status.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@initiationStatus)}"/>
+			    </ns1:MultiColumnFormItem>
+			   <ns1:MultiColumnFormItem label="Init. Parent/Spouse Name:" visible="{component.DataSources.AllDataSources.isMemberUninitiated}" id="lblInitParentName">
+			        <components:PromptTextInput id="initParentName" prompt="e.g. Pb. V.M. Kumar" visible="{component.DataSources.AllDataSources.isMemberUninitiated}" width="{cellWidth}" updateComplete="validateUs()"
+			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@initiatedParent}"/>
+			    </ns1:MultiColumnFormItem>    
+			   <ns1:MultiColumnFormItem label="Age:" visible="{component.DataSources.AllDataSources.isMemberJigyasu || component.DataSources.AllDataSources.isMemberUninitiated}" id="ageLabel">
+			        <components:PromptTextInput id="age" prompt="Age (15yrs+)" visible="{component.DataSources.AllDataSources.isMemberJigyasu || component.DataSources.AllDataSources.isMemberUninitiated}" width="{cellWidth}" updateComplete="validateUs()"
+			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@age}"/>
+			    </ns1:MultiColumnFormItem>
+			   <ns1:MultiColumnFormItem label="Occupation:" visible="{!component.DataSources.AllDataSources.isMemberInitiated}" id="occupationLabel">
+			        <components:AutoComplete 	id="occupation" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.occupation.occupation.category)}" allowNewValues="true"
+												labelField="@label" selectedItemStyleName="none" prompt="Select" visible="{!component.DataSources.AllDataSources.isMemberInitiated}"
+												selectedItem="{component.DataSources.AllDataSources.occupation.occupation.category.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@occupation)}" 
+												updateComplete="validateUs()" width="{cellWidth}"/>
+			    </ns1:MultiColumnFormItem>
+			   <ns1:MultiColumnFormItem id="lblLetterNumber" label="Letter Number:" visible="{component.DataSources.AllDataSources.isMemberJigyasu}">
+<!--			        <components:AutoComplete 	id="acRecommendation" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.jigyasuRecommendation.recommendations.recommendation)}" allowNewValues="true"
+												text="{component.DataSources.AllDataSources.selectedTVCRegistrationEntry.@recommendationType}" labelField="@label" 
+												selectedItemStyleName="none" prompt="Select" visible="{component.DataSources.AllDataSources.isMemberJigyasu}" width="{cellWidth}" updateComplete="validateUs()"/>
+-->
+			        <components:PromptTextInput id="letterNumber" prompt="Letter num." visible="{component.DataSources.AllDataSources.isMemberJigyasu}" width="{cellWidth}" 
+			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@letterNo}"
+			        							updateComplete="validateUs()"/>
+			    </ns1:MultiColumnFormItem>
+			    <mx:HRule width="100%"/>
+			    <ns1:MultiColumnFormItem label="Branch:">
+					<components:AutoComplete 	id="branchName"
+												labelField="@name" selectedItemStyleName="none" prompt="Key branch name"
+												searchText="{component.DataSources.AllDataSources.bcMemberDetails.member.@branchName}"
+												searchChange="handleSearchChange()" change="assignID()"	backspaceAction="remove"/>
+			    </ns1:MultiColumnFormItem>		    
+			    <ns1:MultiColumnFormItem label="Sec. Name:">
+					<mx:TextInput id="inchargeName" text="{(branchName.selectedItem).@secretary}" editable="false"
+									toolTip="{(branchName.selectedItem).@secretary}" width="{cellWidth}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>			    	
+			    <ns1:MultiColumnFormItem label="District:">
+					<mx:TextInput id="districtName" text="{(branchName.selectedItem).@districtSuffix}" 
+								editable="false" toolTip="{(branchName.selectedItem).@districtName}" width="{cellWidth}"/>
+			    </ns1:MultiColumnFormItem>			    			    
+			    <ns1:MultiColumnFormItem label="Region:">
+					<mx:TextInput id="regionName" text="{(branchName.selectedItem).@regionSuffix}" editable="false"
+									toolTip="{(branchName.selectedItem).@regionName}" width="{cellWidth}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>			    	        
+			    <mx:HRule width="100%"/>
+			    <ns1:MultiColumnFormItem label="Home Address">
+			        <components:PromptTextInput id="homeAddress" prompt="Address" width="{cellWidth}"
+			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@homeAddress1}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem label="City:">			
+			        <components:PromptTextInput id="city" prompt="City" width="{cellWidth}"
+			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@city}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>			    
+			    <ns1:MultiColumnFormItem label="Pin Code:">			
+			        <components:PromptTextInput id="pinCode" prompt="eg. 110017" width="{cellWidth}" 
+			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@pincode}"/>
+			    </ns1:MultiColumnFormItem>		    			    
+			    <ns1:MultiColumnFormItem label="State:">
+					<components:AutoComplete 	id="stateName" dataProvider="{new XMLListCollection(ads.statesOfIndia.states.state)}" 
+												labelField="@name" selectedItemStyleName="none" prompt="eg. Uttar Pradesh" change="validateUs()"
+												selectedItem="{ads.statesOfIndia.states.state.(@name == component.DataSources.AllDataSources.bcMemberDetails.member.@state)}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem label="Country:">
+					<components:AutoComplete 	id="countryName" dataProvider="{new XMLListCollection(ads.countriesOfWorld.countries.country)}" 
+												labelField="@name" selectedItemStyleName="none" prompt="eg. India" change="validateUs()"
+												selectedItem="{ads.countriesOfWorld.countries.country.(@name == component.DataSources.AllDataSources.bcMemberDetails.member.@country)}"/>
+			    </ns1:MultiColumnFormItem>
+			    <mx:HRule width="100%"/>
+			    <ns1:MultiColumnFormItem id="eligibility">
+			    	<mx:CheckBox id="eligibilityCheckBox" label="Special Permission"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem id="eligibilityDetails" label="Remarks">
+			        <components:PromptTextInput id="eligibilityDetailsTextBox" prompt="eg. Stores Rep" width="{cellWidth}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>
+			    <mx:HRule width="100%"/>
+			    <ns1:MultiColumnFormItem label="Accomodation Type:">			
+			        <mx:ComboBox id="lAccoType" prompt="Select One" dataProvider="{component.DataSources.AllDataSources.accoType.accomodation.type}" 
+			        				labelField="@name" change="validateSmartAssist(event);"
+			        				selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoTypeIndex}"/>			        
+			    </ns1:MultiColumnFormItem>		    			    
+			    <ns1:MultiColumnFormItem id="accoDetails" label="Mohalla/Sadan Name:">
+			    	<mx:ComboBox id="accoDetailsComboBox" dataProvider="{component.DataSources.AllDataSources.accoType.accomodation.type.(@name == lAccoType.selectedItem.@name).field}"
+			    				labelField="@name" prompt="Select One" change="filterSmartAssist(event);" rowCount="10"
+			    				selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoDetailsIndex}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem id="smartAssistComponent">
+			    	<mx:Button id="btnSmartAssist" label="Smart Assist" click="{createSmartAssistPopupPanel()}" enabled="false"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem id="localAddressLbl" label="Local Address:">			
+			        <mx:TextInput id="lAddress" text="{component.DataSources.AllDataSources.smartAssistLAddressSelected}" width="{cellWidth}" 
+			        	change="validateUs()" focusOut="getLicenseeName()"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem id="lblLicenseeName" label="Licensee. Name:" visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}">
+					<mx:TextInput id="licenseeName" text="{component.DataSources.AllDataSources.licenseeDetails}" editable="false" width="{cellWidth}" 
+						visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem id="lblLicenseeRelation" label="Relation:" visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}">
+							<components:AutoComplete 	id="licenseeRelation" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
+														labelField="@label" selectedItemStyleName="none" prompt="Relation" visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}" updateComplete="validateUs()" allowNewValues="true"/>				
+			    </ns1:MultiColumnFormItem>
+			    <mx:HRule width="100%"/>
+			    <ns1:MultiColumnFormItem label="Stay Till:">			    		
+			        <mx:DateField id="toDate" change="validateUs()"  selectableRange="{{rangeStart : new Date()}}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>
+			    <ns1:MultiColumnFormItem/>
+			    <mx:HRule width="100%"/>
+			    <ns1:MultiColumnFormItem label="No. Children">			    		
+			        <mx:ComboBox id="childCount" enabled="{radioButtonIsPrimary.selected}">
+						<mx:ArrayCollection>
+							<mx:String>0</mx:String>
+							<mx:String>1</mx:String>
+							<mx:String>2</mx:String>
+							<mx:String>3</mx:String>
+							<mx:String>4</mx:String>
+							<mx:String>5</mx:String>
+              			</mx:ArrayCollection>
+			        </mx:ComboBox>			        			    
+			    </ns1:MultiColumnFormItem>
+				<ns1:MultiColumnFormItem label="Ages of Children:">			    		
+			        <components:PromptTextInput id="cAgeString" prompt="Separated by ;" width="100%" enabled="{radioButtonIsPrimary.selected}"/>
+			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>
+			</ns1:MultiColumnForm>
+			<mx:ControlBar>
+				<mx:Button label="Clear" click="{newRegClear()}"/>
+				<mx:Spacer width="100%"/>
+				<mx:Button id="submitButton" label="Submit" click="{submitRequest()}"/>
+		</mx:ControlBar>
+		</mx:VBox>
+		</mx:VBox>
+	</mx:Panel>
+
+	<CustomClasses:AdvancedStringValidator id="val1" source="{fName}" property="text" required="true" 
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!"/> 			
+	<CustomClasses:AdvancedStringValidator id="mNameValidate" source="{mName}" property="text" required="false"
+											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val2" source="{lName}" property="text" required="false" 
+											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!"/>											
+	<CustomClasses:AdvancedStringValidator id="val3" source="{lAddress}" property="text" required="true" 
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="true"/> 			
+	<CustomClasses:AdvancedStringValidator id="val4" source="{toDate}" property="text" required="true" 
+											allowSpecialCharacters="true" allowSpaces="false" allowNumbers="true"/>
+	<mx:NumberValidator id="val5" source="{lAccoType}" lowerThanMinError="This field is required." 
+    			property="selectedIndex" minValue="0" />
+	<mx:NumberValidator id="val6" source="{age}" property="text" allowNegative="false" negativeError="A negative age?"
+								minValue="15" lowerThanMinError="Age must be >= 15yrs" maxValue="110" domain="int" required="true"/>
+	<CustomClasses:AdvancedStringValidator id="val7" source="{assocToPrimaryRel}" property="text" required="{radioButtonIsAssociate.selected}"
+											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val8" source="{stateName}" property="text" required="true"
+											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val9" source="{countryName}" property="text" required="true"
+											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val10" source="{occupation}" property="text" required="true"
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val11" source="{genderType}" property="text" required="true"
+											allowSpecialCharacters="false" allowSpaces="false" allowNumbers="false"
+											specialCharacterNotAllowedError="Special Characters not allowed"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val12" source="{initStatus}" property="text" required="true"
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<mx:NumberValidator id="val13" source="{accoDetailsComboBox}" lowerThanMinError="This field is required." property="selectedIndex" minValue="0" />
+	<CustomClasses:AdvancedStringValidator id="val14" source="{letterNumber}" property="text" required="true"
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val15" source="{licenseeRelation}" property="text" required="true"
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
+											numeralNotAllowedError="Please enter alphabets only!" />
+	<CustomClasses:AdvancedStringValidator id="val16" source="{licenseeName}" property="text" required="true"
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
+											numeralNotAllowedError="Please enter alphabets only!" />																																																							
+</mx:Canvas>

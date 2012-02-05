@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllDataSources;
+			import component.DataSources.AllImageResources;
+			import mx.collections.HierarchicalData;
+			import mx.events.ListEvent;
+			import mx.core.Application;
+        	import mx.containers.HBox;
+            import mx.containers.ControlBar;
+            import mx.containers.Panel;
+            import mx.containers.VBox;
+            import mx.controls.Button;
+            import mx.controls.Label;
+            import mx.controls.Spacer;
+            import mx.controls.Image;
+            import mx.managers.PopUpManager;
+            import mx.controls.Alert;
+            import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+            			
+			
+			private var myFilterOnBoolean:Boolean = false;
+			[Bindable]
+			private var selectedEventID:String = new String();
+			
+			private var eventStatusChangeYesBtn:Button = new Button();
+			private var eventStatusChangeNoBtn:Button = new Button();
+
+			private var panel:Panel;
+
+/*********************HTTP Service Calls ******************************/		
+
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+
+			public function updateDS():void
+			{
+				callService("manage/events/list.do");			
+			}
+		
+			public function callService(url:String):void
+			{
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            switch (serviceCalled)
+					{
+						case "manage/events/list.do":						
+						break;
+						case "manage/events/activate.do":
+						case "manage/events/deactivate.do":
+							var requestObj:Object = new Object();
+							requestObj.EventId = selectedEventID;	
+							service.request = requestObj;						
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+
+        public function httpResult(event:ResultEvent):void
+        {
+        	switch (serviceCalled)
+        	{
+	        	case "manage/events/list.do":
+	        		component.DataSources.AllDataSources.myEvents = new XMLList(event.result);
+	        		setMyDP(true);
+				break;
+				case "manage/events/activate.do":
+				case "manage/events/deactivate.do":
+					component.DataSources.AllDataSources.eventStatusChangeResponse = new XMLList(event.result);
+ 					if(component.DataSources.AllDataSources.eventStatusChangeResponse.message == 'Event activated successfully!!')
+					{
+						component.DataSources.AllDataSources.myEvents.events.event[adg.selectedIndex].@status = "Active";         		
+						updateDS();
+					}
+				else if(component.DataSources.AllDataSources.eventStatusChangeResponse.message == 'Event deactivated successfully!!')
+					{
+						component.DataSources.AllDataSources.myEvents.events.event[adg.selectedIndex].@status = "Terminated";
+         				updateDS();
+					}
+			/*	else
+					{
+						
+					} */
+				break;
+				default:
+					Alert.show("Unrecognized service called");        		
+        	}
+		}
+/*********************HTTP Service Calls ******************************/		
+					
+		public function handleClick(evt:ListEvent):void
+		{
+			if((evt.columnIndex == 7))
+			{
+				selectedEventID = evt.currentTarget.selectedItem.@id;
+				if(selectedEventID != Application.application.aHandleToAccount.currEventID)
+					clickAction();
+			}			
+		}		
+        
+        public function setMyDP(myFilterOn:Boolean):void
+        {
+        	if(myFilterOn == true)
+        		adg.dataProvider = component.DataSources.AllDataSources.myEvents.events.event.((@createdBy == Application.application.aHandleToAccount.myAccountName));
+        	else
+        		adg.dataProvider = component.DataSources.AllDataSources.myEvents.events.event;
+        }
+        
+        public function toggleMyDP():void
+        {
+        	if (myFilterOnBoolean == false)
+        		myFilterOnBoolean = true
+        	else
+        		myFilterOnBoolean = false
+        	setMyDP(myFilterOnBoolean);
+        }
+        
+         public function clickAction():void{
+         	createConfirmEventStatusChangePopup();
+         }
+         
+		private function getString(item:Object,column:DataGridColumn):String
+		{
+			if(item.@status == 'Active')
+				return "Deactivate";
+			else if(item.@status == 'Inactive')
+				return "Activate";
+			else
+				return "";
+		}            
+
+		private function createConfirmEventStatusChangePopup():void
+		{
+			var vb:VBox = new VBox();
+			var hb:HBox = new HBox();
+			var aLabel:Label = new Label();
+			var image:Image = new Image();
+
+			var cb:ControlBar = new ControlBar();
+		
+            eventStatusChangeYesBtn.label = "Yes";
+            eventStatusChangeYesBtn.addEventListener(MouseEvent.CLICK, eventStatusChangeYesBtnSelected);
+			eventStatusChangeNoBtn.label = "No";
+            eventStatusChangeNoBtn.addEventListener(MouseEvent.CLICK, eventStatusChangeNoBtnSelected);
+
+			cb.setStyle("horizontalAlign", "center");
+			cb.setStyle("verticalAlign", "middle");
+            cb.addChild(eventStatusChangeYesBtn);
+            cb.addChild(eventStatusChangeNoBtn);
+
+            panel = new Panel();
+            panel.setStyle("horizontalAlign", "center");
+            panel.setStyle("verticalAlign", "middle");
+            panel.width = 300;
+            panel.height = 180;
+
+			image.source = component.DataSources.AllImageResources.success;
+			aLabel.text = "Proceed to change status? " + selectedEventID;
+			panel.title = "Event Status Change";
+
+			hb.setStyle("horizontalAlign", "center");
+			hb.setStyle("verticalAlign", "middle");					
+			hb.addChild(image);
+			hb.addChild(aLabel)
+			vb.setStyle("paddingBottom", 5);
+			vb.setStyle("paddingLeft", 5);
+			vb.setStyle("paddingRight", 5);
+			vb.setStyle("paddingTop", 5);
+			vb.setStyle("horizontalAlign", "center");
+			vb.setStyle("verticalAlign", "middle");				
+			vb.addChild(hb);										
+
+            panel.addChild(vb);
+            panel.addChild(cb);
+
+            PopUpManager.addPopUp(panel, this, true);
+            PopUpManager.centerPopUp(panel);
+        }
+        
+        private function eventStatusChangeYesBtnSelected(evt:MouseEvent):void {
+            PopUpManager.removePopUp(panel);
+			if(component.DataSources.AllDataSources.myEvents.events.event[adg.selectedIndex].@status == "Inactive")
+			{
+				selectedEventID = component.DataSources.AllDataSources.myEvents.events.event[adg.selectedIndex].@id;
+         		callService("manage/events/activate.do");
+   			}
+         	else if(component.DataSources.AllDataSources.myEvents.events.event[adg.selectedIndex].@status == "Active")
+         	{
+				selectedEventID = component.DataSources.AllDataSources.myEvents.events.event[adg.selectedIndex].@id;         		
+         		callService("manage/events/deactivate.do");
+         	}        	
+        }
+        
+        private function eventStatusChangeNoBtnSelected(evt:MouseEvent):void {
+           PopUpManager.removePopUp(panel);
+        }
+        
+        private function closePopUp(evt:MouseEvent):void {
+            PopUpManager.removePopUp(panel);
+        }
+                                              
+		]]>
+	</mx:Script>
+	<mx:Panel id="manageEvent" width="100%" height="100%" title="Event List" fontFamily="Arial" fontSize="18" 
+								paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+								verticalAlign="middle" horizontalAlign="center">	
+		<mx:VBox width="100%" height="100%" borderStyle="solid"
+				paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+				verticalAlign="middle" horizontalAlign="center">
+			<mx:Spacer height="10%"/>
+			<mx:DataGrid 	id="adg" width="100%" height="100%" initialize="setMyDP(true)" 
+							fontSize="10" itemClick="handleClick(event)">							
+				<mx:columns>
+					<mx:DataGridColumn dataField="@id" headerText="ID" textAlign="center"/>
+					<mx:DataGridColumn dataField="@name" headerText="Name" textAlign="center"/>
+					<mx:DataGridColumn dataField="@createdBy" headerText="Created By" textAlign="center"/>
+					<mx:DataGridColumn dataField="@community" headerText="Community" textAlign="center"/>
+					<mx:DataGridColumn dataField="@context" headerText="Context" textAlign="center"/>			
+					<mx:DataGridColumn dataField="@fromDate" headerText="From" textAlign="center"/>
+					<mx:DataGridColumn dataField="@status" headerText="Status" textAlign="center"/>
+	                <mx:DataGridColumn headerText="Change Status" dataField="@status" editable="false" resizable="true" textAlign="center" labelFunction="getString"/>
+	                </mx:columns>
+			</mx:DataGrid>
+		    <mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{eventStatusChangeResponse.visible}">
+		    	<mx:Label id="eventStatusChangeResponse" visible="false"/> 
+		    </mx:HBox>
+	</mx:VBox>
+	</mx:Panel>
+</mx:Canvas>
