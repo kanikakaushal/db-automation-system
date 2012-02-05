@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="TVC">
+
+	<select id="searchTVCRecords" resultClass="org.satsang.sms.core.activities.tvc.TvcMember"
+		parameterClass="String">
+		select
+			tvcr.TVC_ID as tvcId,
+	    	tvcr.MEMBER_FIRST_NAME as firstName, 
+	    	tvcr.MEMBER_MIDDLE_NAME as middleName, 
+	    	tvcr.MEMBER_LAST_NAME as lastName,
+			tvcr.MEMBER_GENDER as gender, 
+			tvcr.MEMBER_AGE as age, 
+			tvcr.MEMBER_OCCUPATION as occupation,
+	    	ci1.instance_name as branchName, 
+	    	ci2.instance_suffix as districtName, 
+	    	ci3.instance_suffix as regionName,
+	    	ci1.instance_id as branchId, 
+	    	ci2.instance_id as districtId, 
+	    	ci3.instance_id as regionId,
+			tvcr.MEMBER_ADDRESS_LINE1 as addressLine1, 
+			tvcr.MEMBER_ADDRESS_LINE2 as addressLine2,
+	    	tvcr.MEMBER_ADDRESS_CITY as addressCity,
+	    	tvcr.MEMBER_ADDRESS_STATE as addressState,
+	    	tvcr.MEMBER_ADDRESS_COUNTRY as addressCountry,
+			tvcr.MEMBER_ADDRESS_PINCODE as addressPinCode, 
+			tvcr.MEMBER_INITIATION_STATUS as initiationStatus,
+			tvcr.MEMBER_LOCAL_ADDRESS as localAddress, 
+			tvcr.MEMBER_LOCAL_COLONY as localColony,
+			tvcr.MEMBER_STAY_FROMDATE as stayFromDate,
+			tvcr.MEMBER_STAY_TODATE as stayToDate,
+	    	tvcr.MEMBER_CHILDREN_COUNT as noOfChildren,
+	    	tvcr.MEMBER_CHILDREN_AGES as childrenAges,
+	    	tvcr.MEMBER_LOCAL_SADAN as localSadan, 
+	    	tvcr.MEMBER_STAY_CATEGORY as stayCategory,
+	    	tvcr.PERMISSION_TYPE as permissionType, 
+	    	tvcr.PERMISSION_COMMENTS as permissionRemarks,
+			tvcr.IS_DUPLICATE as isDuplicate,
+			tvcr.HOME_STATE_TYPE as homeStateType,
+			tvcr.RECOMMENDATION_TYPE as recommendationType,
+			tvcr.JIGYASU_LETTER_NO as letterNoIfJigyasu,
+			tvcr.INITIATED_PARENT as initiatedParent,
+			tvcr.IS_ASSOCIATE as isAssociate,	    	
+    	case
+      	when tvcr.MEMBER_STAY_CATEGORY = 'Private Quarters' then dbpq.licensee_name
+      	else ""
+    	end as pqLicenseeName,
+    	case
+      	when tvcr.MEMBER_STAY_CATEGORY = 'Private Quarters' then tvcr.PQ_LICENSEE_RELATION
+      	else ""
+    	end as pqLicenseeRelation
+		from tvc_record tvcr
+	    left join sms.db_private_quarter as dbpq
+	    on dbpq.quarter_no = tvcr.member_local_address and dbpq.colony_name = tvcr.MEMBER_LOCAL_COLONY,
+	    sms.community_instance ci1
+		left join sms.community_instance as ci2 on ci1.instance_parent = ci2.instance_id
+		left join sms.community_instance as ci3 on ci2.instance_parent = ci3.instance_id
+		where
+		    tvcr.member_branch_id = ci1.instance_id
+		and $whereClause$
+	</select>
+
+	<insert id="createTVCRecord" parameterClass="map">
+		INSERT ignore INTO sms_activities.TVC_RECORD
+			(TVC_VOLUNTEER, EVENT_ID, TVC_ID, MEMBER_FIRST_NAME,
+			MEMBER_MIDDLE_NAME, MEMBER_LAST_NAME,
+			MEMBER_GENDER, MEMBER_AGE, MEMBER_OCCUPATION,
+			MEMBER_ADDRESS_LINE1, MEMBER_ADDRESS_LINE2,
+			MEMBER_ADDRESS_CITY, MEMBER_ADDRESS_STATE,
+			MEMBER_ADDRESS_COUNTRY, MEMBER_ADDRESS_PINCODE,
+			MEMBER_INITIATION_STATUS, MEMBER_REGION_ID,
+			MEMBER_DISTRICT_ID, MEMBER_BRANCH_ID, MEMBER_LOCAL_ADDRESS,
+			MEMBER_LOCAL_COLONY, MEMBER_STAY_FROMDATE, MEMBER_STAY_TODATE,
+			MEMBER_CHILDREN_COUNT, MEMBER_CHILDREN_AGES,
+			MEMBER_LOCAL_SADAN, MEMBER_STAY_CATEGORY,
+			PERMISSION_TYPE, PERMISSION_COMMENTS, 
+			IS_DUPLICATE, HOME_STATE_TYPE, 
+			PQ_LICENSEE_RELATION, RECOMMENDATION_TYPE, JIGYASU_LETTER_NO, INITIATED_PARENT)
+		VALUES 
+			(#accountId#, #eventId#,
+			#tvc.tvcId#, #tvc.firstName#, #tvc.middleName#,
+			#tvc.lastName#, #tvc.gender#,
+			#tvc.age#, #tvc.occupation#,
+			#tvc.addressLine1#, #tvc.addressLine2#,
+			#tvc.addressCity#, #tvc.addressState#,
+			#tvc.addressCountry#, #tvc.addressPinCode#,
+			#tvc.initiationStatus#, #tvc.regionId#,
+			#tvc.districtId#, #tvc.branchId#, #tvc.localAddress#,
+			#tvc.localColony#, #tvc.stayFromDate#,
+			#tvc.stayToDate#, #tvc.noOfChildren#,
+			#tvc.childrenAges#, #tvc.localSadan#,
+			#tvc.stayCategory#, #tvc.permissionType#, #tvc.permissionRemarks#,
+			#tvc.isDuplicate#, #tvc.homeStateType#, #tvc.pqLicenseeRelation#, 
+			#tvc.recommendationType#, #tvc.letterNoIfJigyasu#, #tvc.initiatedParent#)
+	</insert>
+
+	<update id="editTVCRecord" parameterClass="map">
+		UPDATE sms_activities.TVC_RECORD
+		SET
+			MEMBER_FIRST_NAME = #tvc.firstName#,
+			MEMBER_MIDDLE_NAME = #tvc.middleName#, 
+			MEMBER_LAST_NAME = #tvc.lastName#,
+			MEMBER_GENDER = #tvc.gender#, 
+			MEMBER_AGE = #tvc.age#,
+			MEMBER_OCCUPATION = #tvc.occupation#,
+			MEMBER_ADDRESS_LINE1 = #tvc.addressLine1#, 
+			MEMBER_ADDRESS_LINE2 = #tvc.addressLine2#,
+			MEMBER_ADDRESS_CITY = #tvc.addressCity#,
+			MEMBER_ADDRESS_STATE = #tvc.addressState#, 
+			MEMBER_ADDRESS_COUNTRY = #tvc.addressCountry#,
+			MEMBER_ADDRESS_PINCODE = #tvc.addressPinCode#,
+			MEMBER_INITIATION_STATUS = #tvc.initiationStatus#,
+			MEMBER_REGION_ID = #tvc.regionId#,
+			MEMBER_DISTRICT_ID = #tvc.districtId#,
+			MEMBER_BRANCH_ID = #tvc.branchId#,
+			MEMBER_LOCAL_ADDRESS = #tvc.localAddress#,
+			MEMBER_LOCAL_COLONY = #tvc.localColony#,
+			MEMBER_STAY_TODATE = #tvc.stayToDate#,
+			MEMBER_CHILDREN_COUNT = #tvc.noOfChildren#,
+			MEMBER_CHILDREN_AGES = #tvc.childrenAges#,
+			MEMBER_LOCAL_SADAN = #tvc.localSadan#,
+			MEMBER_STAY_CATEGORY = #tvc.stayCategory#,
+			PERMISSION_TYPE = #tvc.permissionType#,
+			PERMISSION_COMMENTS = #tvc.permissionRemarks#,
+			IS_DUPLICATE = #tvc.isDuplicate#,
+			HOME_STATE_TYPE = #tvc.homeStateType#,
+			PQ_LICENSEE_RELATION = #tvc.pqLicenseeRelation#,
+			RECOMMENDATION_TYPE = #tvc.recommendationType#,
+			JIGYASU_LETTER_NO = #tvc.letterNoIfJigyasu#,
+			INITIATED_PARENT = #tvc.initiatedParent#
+		WHERE EVENT_ID = #eventId# 
+		AND TVC_ID = #tvc.tvcId#
+	</update>
+
+	<select id="getNextEventId" resultClass="int" parameterClass="map">
+		SELECT NEXT_ID
+		FROM sms_activities.TVC_ID_GENERATOR
+		WHERE COMMUNITY_INSTANCE = #instanceId#
+    </select>
+
+	<insert id="insertNextEventId" parameterClass="map">
+		INSERT INTO sms_activities.TVC_ID_GENERATOR
+			(COMMUNITY_INSTANCE, NEXT_ID)
+		VALUES 
+			(#instanceId#, #nextId#)
+	</insert>
+
+	<update id="updateNextEventId" parameterClass="map">
+		UPDATE sms_activities.TVC_ID_GENERATOR
+		SET NEXT_ID = #nextId#
+		WHERE COMMUNITY_INSTANCE = #instanceId#
+	</update>
+
+	<update id="setDuplicate" parameterClass="map">
+		UPDATE sms_activities.TVC_RECORD
+		SET IS_DUPLICATE = 1
+		WHERE EVENT_ID= #eventId#
+		AND TVC_ID = #tvcId#
+	</update>
+	
+	<update id="setAssociates" parameterClass="map">
+		UPDATE sms_activities.TVC_RECORD
+		SET IS_ASSOCIATE = 1
+		WHERE EVENT_ID= #eventId#
+		AND TVC_ID IN $tvcIdList$
+	</update>
+	
+	<update id="resetAssociates" parameterClass="map">
+		UPDATE sms_activities.TVC_RECORD
+		SET IS_ASSOCIATE = 0
+		WHERE EVENT_ID= #eventId#
+		AND TVC_ID IN $tvcIdList$
+	</update>
+	
+	<select id="getPrimaryTvcId" resultClass="String" parameterClass="map">
+		SELECT TVC_ID
+		FROM sms_activities.TVC_ASSOCIATIONS
+		WHERE ASSOCIATE_TVC_ID = #associateTvcId#
+		AND EVENT_ID = #eventId#
+    </select>
+    
+    <select id="tvcExists" resultClass="String" parameterClass="map">
+		SELECT TVC_ID
+		FROM sms_activities.TVC_RECORD
+		WHERE TVC_ID = #tvcId#
+		AND EVENT_ID = #eventId#
+    </select>
+    
+    <select id="isAssociate" resultClass="boolean" parameterClass="map">
+		SELECT IS_ASSOCIATE
+		FROM sms_activities.TVC_RECORD
+		WHERE TVC_ID = #tvcId#
+		AND EVENT_ID = #eventId#
+    </select>
+    
+    <select id="isPrimary" resultClass="String" parameterClass="map">
+		SELECT TVC_ID
+		FROM sms_activities.TVC_ASSOCIATIONS
+		WHERE TVC_ID = #tvcId#
+		AND EVENT_ID = #eventId#
+    </select>
+
+	<select id="getMemberAssociations" resultClass="org.satsang.sms.core.activities.tvc.TvcAssociateMember" parameterClass="map">
+		SELECT
+			a.TVC_ID as tvcId,
+			a.ASSOCIATE_TVC_ID as associateTvcId,
+			a.ASSOCIATE_RELATIONSHIP as associateRelationship,
+			t.MEMBER_FIRST_NAME as firstName, 
+			t.MEMBER_LAST_NAME as lastName,
+			c.instance_name as branchName, 
+			t.MEMBER_GENDER as gender
+		FROM sms_activities.TVC_ASSOCIATIONS a, sms_activities.TVC_RECORD t, sms.COMMUNITY_INSTANCE c
+		WHERE a.EVENT_ID = #eventId#
+		AND a.TVC_ID = #tvcId#
+		AND a.associate_tvc_id = t.tvc_id
+		and a.event_id = t.event_id
+		and c.instance_id = t.member_branch_id		
+    </select>
+
+	<insert id="insertAssociations" parameterClass="String">
+		INSERT ignore INTO sms_activities.TVC_ASSOCIATIONS
+			(EVENT_ID, TVC_ID, ASSOCIATE_TVC_ID, ASSOCIATE_RELATIONSHIP)
+		VALUES $insertClause$
+	</insert>
+	
+	<delete id="deleteAssociations" parameterClass="map">
+		delete from sms_activities.TVC_ASSOCIATIONS 
+		where EVENT_ID = #eventId#
+		AND TVC_ID = #tvcId#
+		<!-- 
+		<dynamic>
+            <isNotNull property="associations">
+                <iterate property="associations" 
+                         prepend="AND " open=" ASSOCIATE_TVC_ID NOT IN ("
+                         close=")" conjunction=",">
+                    #associations[]#
+                </iterate>
+            </isNotNull>
+        </dynamic>   -->
+	</delete>
+	  
+  <select id="getBhandaraRegion" resultClass="java.util.HashMap" parameterClass="map">
+		SELECT bhandara_id as bhandaraId, state_abbrv as stateAbbrv
+		FROM sms_activities.BHANDARA_REGION
+		WHERE branch_id = #branchId#
+  </select>
+  
+  <select id="getLicenseeDetails" resultClass="java.util.HashMap" parameterClass="map">
+		SELECT 
+		licensee_name as licenseeName,
+		concat_ws(',', quarter_no, colony_name) as quarterNo, associated_colony_name as associatedColonyName
+		FROM sms.db_private_quarter
+		WHERE quarter_no= #quarterNo#
+		AND colony_name = #colonyName#
+		AND associated_colony_name = #associatedColonyName#
+  </select>
+  
+  <select id="getPQList" resultClass="java.util.HashMap" parameterClass="map">
+		SELECT 
+		licensee_name as licenseeName,
+		concat_ws(',', quarter_no, colony_name) as quarterNo, associated_colony_name as associatedColonyName
+		FROM sms.db_private_quarter
+		WHERE associated_colony_name = #associatedColonyName#
+  </select>
+</sqlMap>
+

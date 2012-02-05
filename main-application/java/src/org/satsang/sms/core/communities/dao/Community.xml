@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="Community">
+
+	<select id="getRegions" parameterClass="map" resultClass="java.util.HashMap"> SELECT
+		INSTANCE_ID as regionId, INSTANCE_NAME as regionName FROM
+		COMMUNITY_INSTANCE WHERE INSTANCE_NAME LIKE #searchString# AND
+		INSTANCE_TYPE = 'Region'
+	</select>
+	
+	<select id="getDistricts" parameterClass="map" resultClass="java.util.HashMap">
+		SELECT INSTANCE_ID as districtId, INSTANCE_NAME as districtName FROM
+		COMMUNITY_INSTANCE WHERE INSTANCE_NAME LIKE #searchString# AND
+		INSTANCE_TYPE = 'District' AND INSTANCE_PARENT = #regionId#
+	</select>
+	
+	<select id="getBranchesInDistrict" parameterClass="map"
+		resultClass="java.util.HashMap"> SELECT INSTANCE_ID as branchId, INSTANCE_NAME as
+		branchName FROM COMMUNITY_INSTANCE WHERE INSTANCE_NAME LIKE
+		#searchString# AND INSTANCE_TYPE = 'Branch' AND INSTANCE_PARENT =
+		#districtId#
+	</select>
+	
+	<select id="getBranches" parameterClass="map" resultClass="java.util.HashMap">
+		select
+		  	ci.instance_id as branchId, ci.instance_name as branchName, ci.instance_incharge as branchSecretary,
+		  	ci.instance_id as districtId, ci.instance_name as districtName, ci.instance_suffix as districtSuffix,
+      		ci.instance_name as regionName, ci.instance_suffix as regionSuffix, ci.instance_id as regionId
+		from community_instance ci
+		where
+		  ci.instance_type  = 'Headquarter'
+		and
+		  ci.instance_name like #searchString#
+		union
+		select
+		  ci1.instance_id as branchId, ci1.instance_name as branchName, ci1.instance_incharge as branchSecretary,
+		  ci2.instance_id as districtId, ci2.instance_name as districtName, ci2.instance_suffix as districtSuffix,
+		  ci3.instance_name as regionName, ci3.instance_suffix as regionSuffix, ci3.instance_id as regionId
+		from community_instance ci1
+		left join community_instance as ci2 on ci1.instance_parent = ci2.instance_id
+		left join community_instance as ci3 on ci2.instance_parent = ci3.instance_id
+		where
+		    ci1.instance_name like #searchString#
+		and
+		    ci1.instance_type = 'Branch'
+  	</select>
+  	
+  	<select id="getBranchById" parameterClass="map" resultClass="java.util.HashMap">
+		select instance_name as regionName, instance_suffix as regionSuffix, instance_id as branchId, instance_name as branchName,
+		instance_id as regionId, instance_id as districtId, instance_name as districtName, instance_suffix as districtSuffix,
+    	instance_incharge as branchSecretary
+ 		from community_instance
+ 		where instance_type  = 'Headquarter' and instance_id = #branchId#
+		union
+		select
+		c.instance_name as regionName, c.instance_suffix as regionSuffix, sub.branch_id as branchId,
+     	sub.branch_name as branchName,
+		sub.region_id as regionId, sub.district_id as districtId, sub.district_name as districtName,
+   		sub.district_suffix as districtSuffix,
+    	sub.branch_secretary as branchSecretary
+		from community_instance c,
+		(select a.instance_id as branch_id, a.instance_name as branch_name, a.instance_parent as district_id,
+		b.instance_parent as region_id, b.instance_name as district_name, b.instance_suffix as district_suffix, 
+    	a.instance_incharge as branch_secretary
+		from
+		community_instance a, community_instance b
+		where a.instance_id = #branchId# and a.instance_parent = b.instance_id and a.instance_type = 'Branch') as sub
+		where c.instance_id = sub.region_id;
+  	</select>
+  	
+  	<select id="getAllBranches" resultClass="java.util.HashMap">
+		select instance_name as regionName, instance_id as branchId, instance_name as branchName,
+		instance_id as regionId, instance_id as districtId, instance_name as districtName,
+    	instance_incharge as branchSecretary
+ 		from community_instance
+ 		where instance_type  = 'Headquarter'
+		union
+		select
+		c.instance_name as regionName, sub.branch_id as branchId, sub.branch_name as branchName,
+		sub.region_id as regionId, sub.district_id as districtId, sub.district_name as districtName,
+    	sub.branch_secretary as branchSecretary
+		from community_instance c,
+		(select a.instance_id as branch_id, a.instance_name as branch_name, a.instance_parent as district_id,
+		b.instance_parent as region_id, b.instance_name as district_name,
+    	a.instance_incharge as branch_secretary
+		from
+		community_instance a, community_instance b
+		where a.instance_parent = b.instance_id and a.instance_type = 'Branch' or a.instance_type = 'HeadQuarter') as sub
+		where c.instance_id = sub.region_id;
+  	</select>
+</sqlMap>
+

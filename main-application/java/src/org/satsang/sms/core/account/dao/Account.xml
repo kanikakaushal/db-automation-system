@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+  
+<sqlMap namespace="Account">
+
+	<select id="getAccount" parameterClass="map" resultClass="java.util.HashMap">
+		SELECT
+		A1.ACCOUNT_ID as accountId, 
+		A1.ACCOUNT_ALIAS as accountAlias,
+		A1.ACCOUNT_PASSWORD as password,
+		A1.ACCOUNT_ENABLED as isEnabled
+		FROM
+		ACCOUNT A1
+		WHERE A1.ACCOUNT_ID COLLATE latin1_bin = #accountID#
+		AND
+		A1.ACCOUNT_PASSWORD COLLATE latin1_bin = #accountPassword#
+		AND A1.ACCOUNT_ENABLED = 'Y'
+		
+  </select>
+
+	<update id="updatePassword" parameterClass="map">
+		UPDATE ACCOUNT
+		SET ACCOUNT_PASSWORD = #accountPassword# 
+		WHERE ACCOUNT_ID = #accountID#
+	</update>
+
+	<insert id="createAccount" parameterClass="map">
+		INSERT INTO ACCOUNT
+		(ACCOUNT_ID, ACCOUNT_ALIAS, ACCOUNT_PASSWORD, ACCOUNT_ENABLED)
+		VALUES
+		(#accountID#,
+		(SELECT MEMBER_FIRST_NAME FROM MEMBER WHERE
+		MEMBER_ID =
+		#accountID#),
+		#accountPassword#, #accountEnabled#)
+	</insert>
+
+	<update id="disableAccount" parameterClass="map">
+		UPDATE ACCOUNT 
+		SET ACCOUNT_ENABLED = 'N' 
+		WHERE ACCOUNT_ID = #accountID#
+		AND ACCOUNT_PASSWORD = #accountPassword#
+	</update>
+
+	<update id="enableAccount" parameterClass="map">
+		UPDATE ACCOUNT 
+		SET ACCOUNT_ENABLED = 'Y' 
+		WHERE ACCOUNT_ID = #accountID#
+		AND ACCOUNT_PASSWORD = #accountPassword#
+	</update>
+</sqlMap>
+

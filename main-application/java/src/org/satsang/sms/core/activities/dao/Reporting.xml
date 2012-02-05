@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+	
+<sqlMap namespace="Reporting">
+
+	<typeAlias alias="report"
+		type="org.satsang.sms.core.activities.reporting.Report" />
+
+	<resultMap class="report" id="reportMap">
+		<result column="report_file" property="reportFile" jdbcType="BLOB" />
+	</resultMap>
+	
+	<insert id="storeReport" parameterClass="map">
+		INSERT ignore INTO sms_activities.REPORTS
+		(EVENT_ID, TVC_VOLUNTEER, ACTIVITY_NAME, REPORT_NAME, REPORT_TYPE, INSERT_TIMESTAMP,
+		REPORT_FILE)
+		VALUES (#eventId#, #accountId#, #report.activityName#,
+		#report.reportName#, #report.reportType#,
+		NOW(), #report.reportFile#)
+	</insert>
+
+	<select id="getReports" resultClass="report" parameterClass="String">
+		SELECT
+		activity_name as activityName, report_name as reportName, 
+		report_type as reportType, insert_timestamp as reportGenerationDate
+		FROM sms_activities.REPORTS
+		$whereClause$
+  </select>
+
+	<select id="viewReport" resultMap="reportMap" parameterClass="String">
+		SELECT
+		report_file
+		FROM sms_activities.REPORTS
+		WHERE REPORT_NAME = #reportName# 
+	</select>
+
+</sqlMap>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	<aop:config>
+		<aop:aspect ref="PilgrimAccomodationStatisticsManager">
+			<aop:pointcut id="afterTVCRegistration"
+				expression="execution(* org.satsang.sms.core.activities.TvcActionHandler.register(org.satsang.sms.core.activities.tvc.TvcMember, String))
+and args(tvc, bhandaraId)" />
+
+		<aop:pointcut id="viewSadanStats"
+				expression="execution(* org.satsang.sms.core.activities.TvcActionHandler.sadanStats()) and args()" />
+
+
+		<aop:pointcut id="viewSQStats"
+				expression="execution(* org.satsang.sms.core.activities.TvcActionHandler.sabhaQuarterStats(String, int))
+and args(colonyName, noOfPeople)" />
+
+
+			<aop:after-returning pointcut-ref="afterTVCRegistration"
+				method="update" />
+				
+			<aop:around pointcut-ref="viewSadanStats"
+				method="getSadanStatistic" />
+			
+			<aop:around pointcut-ref="viewSQStats"
+				method="getSabhaQuarterVacancies" />
+		
+		</aop:aspect>
+	</aop:config>
+</beans>

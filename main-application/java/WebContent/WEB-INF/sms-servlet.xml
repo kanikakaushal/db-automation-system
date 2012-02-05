@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+ 
+	<bean id="simpleUrlMapping"
+		class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/login.do">LoginController</prop>
+				<prop key="/reports/*">ReportingController</prop>
+				<prop key="/activities/*">ActivityController</prop>
+				<prop key="/tvc/*">TVCController</prop>
+				<prop key="/tvc/associations/*">TVCController</prop>
+				<prop key="/logout.do">LogoutController</prop>
+				<prop key="/communities.do">CommunityRequestsController</prop>	
+				<prop key="/branches.do">CommunityRequestsController</prop>
+				<prop key="/events/*">EventRequestsController</prop>
+				<prop key="/manage/events/*">ManageEventsController</prop>	
+				<prop key="/member.do">MemberRequestsController</prop>				
+			</props>
+		</property>
+	</bean>
+	<bean id="LoginController" class="org.satsang.sms.web.controllers.LoginController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="LogoutController" class="org.satsang.sms.web.controllers.LogoutController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="CommunityRequestsController" class="org.satsang.sms.web.controllers.CommunityRequestsController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="MemberRequestsController" class="org.satsang.sms.web.controllers.MemberRequestsController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="EventRequestsController" class="org.satsang.sms.web.controllers.EventRequestsController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="ManageEventsController" class="org.satsang.sms.web.controllers.ManageEventsController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="ActivityController" class="org.satsang.sms.web.controllers.ActivityController">
+		<property name="masterController" ref="MasterController" />
+	</bean>
+	<bean id="TVCController" class="org.satsang.sms.web.controllers.TvcController">
+		<property name="masterController" ref="MasterController" />
+		<property name="printFactory" ref="printFactory" />	
+	</bean>
+	<bean id="ReportingController" class="org.satsang.sms.web.controllers.ReportingController">
+		<property name="masterController" ref="MasterController" />
+		<property name="reportTemplates">
+			<props>
+				<prop key="Daily Arrivals">WEB-INF\report-templates\Daily Arrivals.jasper</prop>
+			</props>
+		</property>
+	</bean>	
+</beans>

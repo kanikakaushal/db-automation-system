@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="Member">
+ 
+  <select id="getMemberByMemberId" resultClass="org.satsang.sms.core.member.Member" parameterClass="map">
+     SELECT
+        M1.MEMBER_ID as memberId,
+        M1.FIRST_NAME as memberFirstName,
+        M1.MIDDLE_NAME as memberMiddleName,
+        M1.LAST_NAME as memberLastName,
+        M2.OCCUPATION as memberOccupation,
+        M1.GENDER as memberGender,
+        M1.AGE as memberAge,
+        M1.INITIATION_STATUS as initiationStatus,
+        M1.JIGYASU_LETTER_NO as letterNoIfJigyasu,
+        M1.INITIATED_PARENT as initiatedParent,
+        M2.ADDRESS_LINE_1 as memberAddressLine1,
+        M2.ADDRESS_LINE_2 as memberAddressLine2,
+        M2.ADDRESS_CITY as memberAddressCity,
+        M2.ADDRESS_STATE as memberAddressState,
+        M2.ADDRESS_COUNTRY as memberAddressCountry,
+        M2.ADDRESS_PINCODE as memberAddressPinCode,
+        M2.MOBILE_NO as memberContactNo,
+        CASE
+          WHEN M1.BRANCH_CODE IS NULL THEN ""
+          ELSE M1.BRANCH_CODE
+        END as branchCode,
+        CASE
+          WHEN ci1.instance_name = " " THEN ""
+          ELSE ci1.instance_name
+        END as branchName,
+        CASE
+          WHEN ci2.instance_id IS NULL THEN ""
+          ELSE ci2.instance_id
+        END  as districtId,
+        CASE
+          WHEN ci2.instance_name IS NULL THEN ""
+          ELSE ci2.instance_name
+        END as districtName,
+        CASE
+          WHEN ci2.instance_suffix IS NULL THEN ""
+          ELSE ci2.instance_suffix
+        END as districtSuffix,
+        CASE
+          WHEN ci3.instance_name IS NULL THEN ""
+          ELSE ci3.instance_name
+        END as regionName,
+        CASE
+          WHEN ci3.instance_suffix IS NULL THEN ""
+          ELSE ci3.instance_suffix
+        END as regionSuffix,
+        CASE
+          WHEN ci3.instance_id IS NULL THEN ""
+          ELSE ci3.instance_id
+        END as regionId
+        FROM MEMBER M1, MEMBER_DETAILS M2, community_instance ci1
+        left join community_instance as ci2 on ci1.instance_parent = ci2.instance_id
+        left join community_instance as ci3 on ci2.instance_parent = ci3.instance_id
+        WHERE M1.MEMBER_ID = M2.MEMBER_ID
+        AND IFNULL(M1.BRANCH_CODE,"Unknown") = ci1.instance_id
+        AND M1.MEMBER_ID = #memberId#    
+  </select>
+
+</sqlMap>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig
+PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"
+"http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+<sqlMapConfig>
+	<settings useStatementNamespaces="true"/>
+    <sqlMap resource="org/satsang/sms/core/account/dao/Account.xml"/>
+    <sqlMap resource="org/satsang/sms/core/account/dao/AccountPriv.xml"/>
+    <sqlMap resource="org/satsang/sms/core/communities/dao/Community.xml"/>
+    <sqlMap resource="org/satsang/sms/core/event/dao/Event.xml"/>
+    <sqlMap resource="org/satsang/sms/aspects/statistics/dao/PilgrimStatistics.xml"/>
+    <sqlMap resource="org/satsang/sms/core/member/dao/Member.xml"/>
+    
+</sqlMapConfig>
