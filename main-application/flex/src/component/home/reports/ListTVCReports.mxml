@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" xmlns:ns1="nz.co.codec.flex.multicolumnform.*"
+			xmlns:components="com.hillelcoren.components.*">
+			
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import component.DataSources.AllDataSources;
+            import mx.events.ListEvent;
+            import mx.controls.Alert;            
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;            		
+
+            [Bindable]
+            private var reportSelected:String = new String();
+            [Bindable]
+            private var activityNameSelected:String = new String();
+            [Bindable]
+            private var reportNameSelected:String = new String();
+            [Bindable]
+            private var reportTypeSelected:String = new String();                                      
+			
+			public function handleClick(evt:ListEvent):void
+			{
+				reportNameSelected = evt.currentTarget.selectedItem.@reportName;
+				buttonViewReport.enabled = true;
+			}
+
+/*********************HTTP Service Calls ******************************/		
+
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+					
+			public function callService(url:String):void
+			{
+		            var requestObj:Object = new Object();
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "reports/list.do":
+							
+							requestObj.ActivityName = activityNameSelected;
+							requestObj.ReportType = reportTypeComboBox.text;																
+							service.request = requestObj;
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+	
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+
+	        public function httpResult(event:ResultEvent):void
+	        {
+	        	switch (serviceCalled)
+	        	{
+		        	case "reports/list.do":
+						component.DataSources.AllDataSources.tvcReportList = new XMLList(event.result);						
+					break;
+					default:
+						Alert.show("Unrecognized service called");        		
+	        	}
+			}
+			
+			public function viewReport(url:String):void
+			{
+				var myRequest:URLRequest = new URLRequest ();
+				var variables:URLVariables = new URLVariables();
+            	variables.ReportName = reportNameSelected;
+            	myRequest.data = variables;
+            				
+    			myRequest.url=component.DataSources.AllDataSources.hostName + url;
+    			myRequest.method = URLRequestMethod.POST;
+    			navigateToURL ( myRequest, "_blank" );				
+			}	
+				
+/*********************HTTP Service Calls ******************************/
+
+			public function assignID():void
+			{
+				if(activityName.selectedItem != null)
+					activityNameSelected = activityName.selectedItem.@label;
+			}
+
+			public function searchClear():void
+			{
+				activityName.selectedItemId = -1;
+				activityName.text = null;
+				activityName.validateNow();
+				activityName.text = null;
+				activityName.text = "";
+				activityName.prompt = "eg. TVC";
+				activityNameSelected = "";
+				reportTypeComboBox.selectedIndex = -1;
+				reportTypeComboBox.text = null;
+				reportTypeComboBox.validateNow();
+				reportTypeComboBox.text = null;
+				reportTypeComboBox.prompt = "Select One";
+				if(adg.dataProvider != null) adg.dataProvider.removeAll();
+				buttonViewReport.enabled = false;
+			}
+
+			public function invokeSearch():void
+			{
+				if((activityNameSelected != "") && (reportTypeComboBox.selectedIndex != -1))
+					callService('reports/list.do');
+			}
+
+			public function doSomething():void
+			{
+
+			}															
+		]]>
+	</mx:Script>
+    <mx:VBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle">
+    <mx:VBox height="60%" width="100%" horizontalAlign="center" verticalAlign="middle" >
+		<mx:VBox width="100%" height="50%" horizontalAlign="center" verticalAlign="middle" borderStyle="solid">
+			<ns1:MultiColumnForm numColumns="1" width="100%" height="100%">
+			    <ns1:MultiColumnFormItem label="Activity Name:">
+					<components:AutoComplete 	id="activityName" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.myActivities.activities.activity)}"
+												labelField="@label" selectedItemStyleName="none" prompt="eg. TVC" change="assignID()"
+												backspaceAction="remove"/>
+			    </ns1:MultiColumnFormItem>		    
+		    <ns1:MultiColumnFormItem label="Report Type">
+		    	<mx:ComboBox id="reportTypeComboBox" dataProvider="{component.DataSources.AllDataSources.reportTypesTVC.activityType.(@label='TVC').reportType}"
+		    				labelField="@label" prompt="Select One"/>
+		    </ns1:MultiColumnFormItem>
+
+		</ns1:MultiColumnForm>
+		<mx:ControlBar>
+			<mx:HBox width="100%" height="100%">
+				<mx:Button label="Clear" click="{searchClear()}"/>
+				<mx:Spacer width="100%"/>			
+				<mx:Button label="Search" click="{invokeSearch()}"/>				
+			</mx:HBox>
+		</mx:ControlBar>		
+		</mx:VBox>   	
+    </mx:VBox>			
+	<mx:VBox width="100%" height="50%" horizontalAlign="center" verticalAlign="middle" borderStyle="solid">
+			<mx:DataGrid 	id="adg" dataProvider="{component.DataSources.AllDataSources.tvcReportList.reports.report}" 
+							width="100%" height="100%" fontSize="10" itemClick="handleClick(event)">
+				<mx:columns>
+					<mx:DataGridColumn dataField="@activityName" headerText="Activity Name" textAlign="center"/>
+					<mx:DataGridColumn dataField="@reportType" headerText="Report Type" textAlign="center"/>
+					<mx:DataGridColumn dataField="@reportName" headerText="Report Name" textAlign="center"/>
+					<mx:DataGridColumn dataField="@createdOn" headerText="Created On" textAlign="center"/>					
+				</mx:columns>
+			</mx:DataGrid> 
+		<mx:ControlBar>
+			<mx:HBox width="100%" height="100%">		
+				<mx:Button id="buttonViewReport" label="View Report" click="{viewReport('reports/view.do')}" enabled="false"/>				
+			</mx:HBox>
+		</mx:ControlBar>			   	
+    </mx:VBox>	    	
+    </mx:VBox>
+</mx:Canvas>

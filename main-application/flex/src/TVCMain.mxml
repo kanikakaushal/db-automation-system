@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:comps="component.*" xmlns:compsHome="component.home.*" xmlns:CustomClasses="CustomClasses.*"
+	layout="absolute" backgroundColor="white" initialize="initializeObjects();"
+	creationComplete="initVars()">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import component.DataSources.AllDataSources;
+	 		import CustomClasses.Account;
+	 		[Bindable]
+	 		public var aHandleToAccount:Account;
+
+			private function initializeObjects():void
+			{
+ 				aHandleToAccount = new Account();
+			}			
+			
+			private function initVars():void {
+				component.DataSources.AllDataSources.hostName = "http://" + Application.application.parameters.host + ":"+ Application.application.parameters.port + "/" + Application.application.parameters.app+ "/";
+<!--   	        component.DataSources.AllDataSources.hostName = "http://" + "localhost" + ":"+ "8080" + "/" + "sms" + "/";-->
+     		}
+			
+ 			public function populateAccount(anXMLNode:XML):void
+ 			{
+ 				aHandleToAccount.myAccountName = anXMLNode.@name;
+ 				aHandleToAccount.myAccountID = anXMLNode.@id;
+ 				aHandleToAccount.myTerminalID = stxLogin.terminalID.text;
+ 				component.DataSources.AllDataSources.welcomeString = "Welcome " + parentDocument.aHandleToAccount.myAccountName + 
+																	". You are logged into " + parentDocument.aHandleToAccount.myTerminalID + ".";
+ 			}
+ 			
+ 			public function resetViewElements():void
+			{
+				if(myViewStack.selectedIndex == 0)
+					stxLogin.resetForm();
+				else if(myViewStack.selectedIndex == 1)
+					stxLogin.resetForm();
+			}
+			
+            public function logoutuser():void
+ 			{
+				stxHome.callService("logout.do");
+			}			
+		]]>
+	</mx:Script>			
+	
+	<mx:ViewStack id="myViewStack" width="100%" height="100%" change="resetViewElements()">
+		<comps:Login id="stxLogin"/>
+		<compsHome:Home id="stxHome"/>
+	</mx:ViewStack>
+<!--	<CustomClasses:ClientIdleTimeOut 	id="TimerId" onTimeOut="logoutuser" listenKeyStroke="true" 
+										listenMouseMove="true" timeOutInterval="{component.DataSources.AllDataSources.timeOutInterval}" 
+										confirmInterval="{component.DataSources.AllDataSources.confirmInterval}"/> -->	
+</mx:Application>

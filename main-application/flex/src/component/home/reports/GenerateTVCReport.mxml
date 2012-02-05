@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas 	xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+			xmlns:ns1="nz.co.codec.flex.multicolumnform.*" xmlns:components="com.hillelcoren.components.*"
+			xmlns:CustomClasses="CustomClasses.*" creationComplete="onInit()">
+			
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllDataSources;
+            import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			import mx.controls.Alert;
+			import mx.core.Application;
+
+	private function onInit():void
+	{
+		serviceCalled = new String();
+	    jasperParamString = new String();
+	    lblFromDate.visible = false;
+	    fromDate.visible = false;
+	    lblToDate.visible = false;
+	    toDate.visible = false;
+		submitButton.enabled = false;	
+	}
+
+/*********************HTTP Service Calls ******************************/		
+
+	        private var serviceCalled:String;
+	        private var jasperParamString:String;
+			private var todayDate:String;
+					
+			public function callService(url:String):void
+			{ 
+		            serviceCalled = url;		            
+		            
+					switch (serviceCalled)
+					{
+						case "reports/generate.do":
+ 							jasperParamString = "";
+							jasperParamString = "From_Date," + dateFormatter1.format(fromDate.selectedDate) + ";";
+							jasperParamString = jasperParamString + "Event_Name," + Application.application.aHandleToAccount.currEventName + ";";
+							jasperParamString = jasperParamString + "Event_ID," + Application.application.aHandleToAccount.currEventID + ";";
+							jasperParamString = jasperParamString + "To_Date," + dateFormatter1.format(toDate.selectedDate) + ";";
+							
+							var myRequest:URLRequest = new URLRequest ();
+							
+							var variables:URLVariables = new URLVariables();
+            				variables.ActivityName = "TVC";
+            				variables.ReportType = reportTypeComboBox.selectedLabel;
+            				variables.ReportName = tvcReportName.text;
+            				variables.ReportParams = jasperParamString;
+            				myRequest.data = variables;
+            											
+                			myRequest.url=component.DataSources.AllDataSources.hostName + url;        
+                			myRequest.method = URLRequestMethod.POST;
+                			navigateToURL ( myRequest, "_blank" );
+                			
+                			reportCreationStatusHBox.visible = true;
+							reportCreateStatus.visible = true;
+							reportCreateStatus.text = "Report " + tvcReportName.text + " created successfully!";
+							submitButton.enabled = false;
+						break;
+						default:
+							Alert.show("Unrecognized service called");
+					}
+	  		}                             
+		
+/*********************HTTP Service Calls ******************************/
+			
+			private function genReportClear():void
+			{
+				reportTypeComboBox.selectedIndex = -1;
+				 tvcReportName.text = "";
+				reportCreateStatus.text = "";
+				 reportCreationStatusHBox.visible = false;
+				 reportCreateStatus.visible = false;
+				 submitButton.enabled = false;
+			    lblFromDate.visible = false;
+			    fromDate.visible = false;
+			    lblToDate.visible = false;
+			    toDate.visible = false;
+				submitButton.enabled = false;
+			}
+			
+			private function submitRequest():void
+			{
+				callService("reports/generate.do");
+			}
+			
+		private function validateUs() :void
+		{
+			submitButton.enabled = (Validator.validateAll([val1, val2]).length == 0);
+		}
+		
+		private function processSelection(event:Event):void{
+			if((event.target).selectedLabel == "Daily Arrivals"){
+			    lblFromDate.visible = true;
+			    fromDate.visible = true;
+			    lblToDate.visible = true;
+			    toDate.visible = true;
+				submitButton.enabled = true;				
+			}
+		}			
+		]]>
+	</mx:Script>			
+			
+	<mx:VBox height="100%" width="100%" horizontalAlign="center" verticalAlign="middle" borderStyle="solid">
+		<ns1:MultiColumnForm numColumns="2">
+		    <ns1:MultiColumnFormItem label="Event ID: ">			
+		        <mx:Label text="{Application.application.aHandleToAccount.currEventID}"/>
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem/>		
+		    <ns1:MultiColumnFormItem label="Activity Name: ">			
+		        <mx:Label text="TVC"/>
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem/>
+		    <ns1:MultiColumnFormItem label="Report Type">
+		    	<mx:ComboBox id="reportTypeComboBox" dataProvider="{component.DataSources.AllDataSources.reportTypesTVC.activityType.(@label='TVC').reportType}"
+		    				labelField="@label" prompt="Select One" change="processSelection(event)"/>
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem/>		    
+		    <ns1:MultiColumnFormItem label="Report Name:">			
+		        <components:PromptTextInput id="tvcReportName" prompt="Used for the label on the report" width="100%" textAlign="left" change="validateUs()"/>
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem/>
+		    <ns1:MultiColumnFormItem label="From:" id="lblFromDate">
+	            <CustomClasses:DateTimePicker id="fromDate" selectedDate="{new Date()}" minuteIncrement="5" backgroundColor="#FFFFFF"/>        
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem/>
+		    <ns1:MultiColumnFormItem label="To:" id="lblToDate">
+	            <CustomClasses:DateTimePicker id="toDate" selectedDate="{new Date()}" minuteIncrement="5" backgroundColor="#FFFFFF"/>        
+		    </ns1:MultiColumnFormItem>
+		    <ns1:MultiColumnFormItem/>
+		</ns1:MultiColumnForm>
+	    <mx:HBox id="reportCreationStatusHBox" width="60%" horizontalAlign="center" verticalAlign="middle" 
+	    			visible="false" borderStyle="solid">
+	    	<mx:Label id="reportCreateStatus" visible="false"/> 
+	    </mx:HBox>		
+		<mx:ControlBar>
+				<mx:Button label="Clear" click="{genReportClear()}"/>
+				<mx:Spacer width="100%"/>
+				<mx:Button id="submitButton" label="Generate" click="{submitRequest()}"/>
+		</mx:ControlBar>		
+	</mx:VBox>
+	<mx:DateFormatter id="dateFormatter1" formatString="YYYY-MM-DD JJ:NN"/>
+	<mx:DateFormatter id="dateFormatter2" formatString="YYYY-MM-DD"/>	
+	<mx:Validator id="val1" source="{tvcReportName}" property="text" required="true"/>
+	<mx:NumberValidator id="val2" source="{reportTypeComboBox}" lowerThanMinError="This field is required." 
+    			property="selectedIndex" minValue="0" />							    	
+</mx:Canvas>

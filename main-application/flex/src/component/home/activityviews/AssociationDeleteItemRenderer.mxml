@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- itemRenderers\dataGrid\myComponents\RendererDGHeader.mxml -->
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ListEvent;
+			import flash.events.MouseEvent;
+			import mx.controls.Alert;
+			import component.DataSources.AllImageResources;
+			
+			public function handleClick():void
+			{
+				parentDocument.clickAction();
+			}
+		]]>
+	</mx:Script>
+     <mx:Label text="delete" color="red" textAlign="center" click="handleClick()"/>
+</mx:HBox>

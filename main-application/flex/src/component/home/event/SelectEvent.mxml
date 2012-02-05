@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" initialize="updateDS()">
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllDataSources;
+			import component.DataSources.AllImageResources;
+			import mx.collections.HierarchicalData;
+			import mx.events.ListEvent;
+			import mx.core.Application;
+        	import mx.containers.HBox;
+            import mx.containers.ControlBar;
+            import mx.containers.Panel;
+            import mx.containers.VBox;
+            import mx.controls.Button;
+            import mx.controls.Label;
+            import mx.controls.Spacer;
+            import mx.controls.Image;
+            import mx.managers.PopUpManager;
+            import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;			
+			
+			private var currentEventSelected:String = new String();
+			private var currentEventName:String = new String();			
+			private var currentCommunitySelected:String = new String();
+			private var currentContextSelected:String = new String();
+			
+			private var panel:Panel;
+
+/*********************HTTP Service Calls ******************************/		
+	        private var service:HTTPService;
+	        private var serviceCalled:String = new String("");
+
+			public function updateDS():void
+			{
+				currentEventSelected = '';
+				callService("events/list.do");
+				/* In response to Bug # 15 */
+				selectButton.enabled = false;
+				/* In response to Bug # 15 */
+			}
+			
+			public function callService(url:String):void
+			{
+		            service = new HTTPService();
+		            
+		            serviceCalled = url;
+		            
+					switch (serviceCalled)
+					{
+						case "events/select.do":
+							var requestObj:Object = new Object();
+							requestObj.EventId = currentEventSelected;
+							service.request = requestObj;
+						break;
+						case "events/list.do":
+						break;						
+						default:
+							Alert.show("Unrecognized service called");
+					}
+		            service.url = component.DataSources.AllDataSources.hostName + url;
+		            service.resultFormat = "e4x";
+	
+		            service.method = "GET";
+		            service.addEventListener("result", httpResult);
+		            service.addEventListener("fault", httpFault);
+			        service.send();
+	  		}                             
+	
+	        public function httpFault(event:FaultEvent):void {
+	                var faultstring:String = event.fault.faultString;
+	                Alert.show(faultstring);
+	        }
+	
+		    public function httpResult(event:ResultEvent):void
+		    {
+		    	switch (serviceCalled)
+		    	{
+		        	case "events/select.do":
+		        	break;
+		        	case "events/list.do":
+		        		component.DataSources.AllDataSources.myEvents = new XMLList(event.result);
+					break;
+					case "":
+					break;
+					default:
+						Alert.show("Unrecognized service called");        		
+		    	}
+			}
+/*********************HTTP Service Calls ******************************/		
+			
+			public function handleClick(evt:ListEvent):void
+			{
+				currentEventSelected = evt.currentTarget.selectedItem.@id;
+				currentEventName = evt.currentTarget.selectedItem.@name;
+				currentCommunitySelected = evt.currentTarget.selectedItem.@community;
+				currentContextSelected = evt.currentTarget.selectedItem.@context;
+				/* In response to Bug # 15 */
+				selectButton.enabled = true;
+				/* In response to Bug # 15 */
+			}
+			
+			private function chooseEvent():void
+			{
+				callService("events/select.do");
+				component.DataSources.AllDataSources.currEventDetails = "Current Event: " + currentEventSelected;
+				Application.application.aHandleToAccount.currEventID = currentEventSelected;
+				Application.application.aHandleToAccount.currEventName = currentEventName;
+				Application.application.aHandleToAccount.currCommunity = currentCommunitySelected;
+				Application.application.aHandleToAccount.currContext = currentContextSelected;
+				createPopupPanelElements();
+				/* In response to Bug # 15 */
+				selectButton.enabled = false;
+				/* In response to Bug # 15 */
+			}
+			
+			private function createPopupPanelElements():void
+			{
+				var vb:VBox = new VBox();
+				var hb:HBox = new HBox();
+				var aLabel:Label = new Label();
+				var image:Image = new Image();
+	
+				var cb:ControlBar = new ControlBar();
+				var b1:Button = new Button();
+			
+                b1.label = "OK";
+                b1.addEventListener(MouseEvent.CLICK, closePopUp);
+
+				cb.setStyle("horizontalAlign", "center");
+				cb.setStyle("verticalAlign", "middle");
+                cb.addChild(b1);
+
+                panel = new Panel();
+                panel.setStyle("horizontalAlign", "center");
+                panel.setStyle("verticalAlign", "middle");
+                panel.width = 300;
+                panel.height = 180;
+
+				image.source = component.DataSources.AllImageResources.success;
+				aLabel.text = "Default Event Set To: " + Application.application.aHandleToAccount.myCurrEventID;
+				panel.title = "Event Selection";
+
+				hb.setStyle("horizontalAlign", "center");
+				hb.setStyle("verticalAlign", "middle");					
+				hb.addChild(image);
+				hb.addChild(aLabel)
+				vb.setStyle("paddingBottom", 5);
+				vb.setStyle("paddingLeft", 5);
+				vb.setStyle("paddingRight", 5);
+				vb.setStyle("paddingTop", 5);
+				vb.setStyle("horizontalAlign", "center");
+				vb.setStyle("verticalAlign", "middle");				
+				vb.addChild(hb);										
+
+                panel.addChild(vb);
+                panel.addChild(cb);
+
+                PopUpManager.addPopUp(panel, this, true);
+                PopUpManager.centerPopUp(panel);
+            }
+
+            private function closePopUp(evt:MouseEvent):void {
+                PopUpManager.removePopUp(panel);
+            }
+        
+		]]>
+	</mx:Script>
+	<mx:Panel id="selectEvent" width="100%" height="100%" title="Event List" fontFamily="Arial" fontSize="18" 
+								paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+								verticalAlign="middle" horizontalAlign="center">
+		<mx:VBox width="100%" height="100%" borderStyle="solid"
+				paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+				verticalAlign="middle" horizontalAlign="center" defaultButton="{selectButton}">
+			<mx:DataGrid 	id="adg" width="100%" height="100%" dataProvider="{component.DataSources.AllDataSources.myEvents.events.event}" 
+							fontSize="10" itemClick="handleClick(event)">							
+				<mx:columns>
+					<mx:DataGridColumn dataField="@id" headerText="ID" textAlign="center"/>
+					<mx:DataGridColumn dataField="@name" headerText="Name" textAlign="center"/>
+					<mx:DataGridColumn dataField="@createdBy" headerText="Created By" textAlign="center"/>
+					<mx:DataGridColumn dataField="@community" headerText="Community" textAlign="center"/>
+					<mx:DataGridColumn dataField="@context" headerText="Context" textAlign="center"/>			
+					<mx:DataGridColumn dataField="@fromDate" headerText="From" textAlign="center"/>
+					<mx:DataGridColumn dataField="@status" headerText="Status" textAlign="center"/>
+	                </mx:columns>
+			</mx:DataGrid>
+		<mx:ControlBar>
+			<mx:HBox width="100%" height="100%">
+				<mx:Spacer width="100%"/>
+				<mx:Button label="Select" id="selectButton" click="{chooseEvent()}" enabled="false"/>				
+			</mx:HBox>
+		</mx:ControlBar>
+	</mx:VBox>
+	</mx:Panel>	
+</mx:Canvas>

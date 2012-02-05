@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" 
+	xmlns:compsEvent="component.home.event.*">
+
+	<mx:Script>
+		<![CDATA[
+			import component.DataSources.AllImageResources;
+			import mx.controls.Alert;
+			
+			public function refreshChildDataProviders():void
+			{
+				if(eventTabNavigator.selectedIndex == 0)
+					selEvent.updateDS();
+				else if(eventTabNavigator.selectedIndex == 2)
+					manageEventPanel.updateDS();
+				else if(eventTabNavigator.selectedIndex == 3)
+					srchPastEvent.clearDS();					
+			}
+		]]>
+	</mx:Script>
+
+	<mx:Canvas width="100%" height="100%">
+		<mx:VBox 	width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+					paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+			<mx:TabNavigator id="eventTabNavigator" width="100%" height="100%" change="refreshChildDataProviders()"
+				paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10">
+				<mx:Canvas id="selectEventCanvas" label="Select" width="100%" height="100%" 
+						icon="{component.DataSources.AllImageResources.select}">
+						<compsEvent:SelectEvent id="selEvent" width="100%" height="100%"/>
+				</mx:Canvas>
+				<mx:Canvas id="createEventCanvas" label="Create" width="100%" height="100%" 
+						icon="{component.DataSources.AllImageResources.newreg}">
+<!--					<mx:Panel id="newEvent" width="100%" height="100%" title="New Event Details" fontFamily="Arial" fontSize="18" 
+						paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+						verticalAlign="middle" horizontalAlign="center">
+							<compsEvent:CreateNewEvent id="createNewEventPanel" width="100%" height="100%"/>
+					</mx:Panel> -->
+					<compsEvent:CreateNewEvent id="createNewEventPanel" width="100%" height="100%"/>					
+				</mx:Canvas>
+				<mx:Canvas id="manageEventCanvas" label="Manage" width="100%" height="100%" 
+						icon="{component.DataSources.AllImageResources.settings}">
+<!--					<mx:Panel id="manageEvent" width="100%" height="100%" title="My Event Details" fontFamily="Arial" fontSize="18" 
+						paddingTop="10" paddingLeft="10" paddingRight="10" paddingBottom="10"
+						verticalAlign="middle" horizontalAlign="center">
+							<compsEvent:ManageMyEvent id="manageEventPanel" width="100%" height="100%"/>
+					</mx:Panel> -->
+					<compsEvent:ManageMyEvent id="manageEventPanel" width="100%" height="100%"/>					
+				</mx:Canvas>
+				<mx:Canvas id="searchPastEventCanvas" label="Search Past Events" width="100%" height="100%" icon="{component.DataSources.AllImageResources.search}">
+					<mx:HBox width="100%" height="100%">
+						<mx:Panel id="searchPastEvent" width="20%" height="100%" title="Search Past Events" fontFamily="Arial" fontSize="18"
+							verticalAlign="middle" horizontalAlign="center">
+					            <mx:VBox label="Search By Date" width="100%" fontFamily="Arial" fontSize="12"
+					                horizontalAlign="center"
+					                verticalAlign="middle" icon="{component.DataSources.AllImageResources.searchbydate}">
+									<compsEvent:SearchEventByDate id="searchEventByDate"/>
+					            </mx:VBox>
+						</mx:Panel>
+						<compsEvent:SearchPastEvents id="srchPastEvent" width="80%" height="100%"/>
+					</mx:HBox>				
+				</mx:Canvas>								
+			</mx:TabNavigator>			
+		</mx:VBox>
+	</mx:Canvas>
+</mx:Canvas>
