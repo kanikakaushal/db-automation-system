@@ -119,21 +119,22 @@
 			        <components:PromptTextInput id="city" prompt="City" width="{cellWidth}"
 			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@city}"/>
 			    </ns1:MultiColumnFormItem>
-			    <ns1:MultiColumnFormItem/>			    
 			    <ns1:MultiColumnFormItem label="Pin Code:">			
 			        <components:PromptTextInput id="pinCode" prompt="eg. 110017" width="{cellWidth}" 
 			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@pincode}"/>
-			    </ns1:MultiColumnFormItem>		    			    
-			    <ns1:MultiColumnFormItem label="State:">
-					<components:AutoComplete 	id="stateName" dataProvider="{new XMLListCollection(ads.statesOfIndia.states.state)}" 
-												labelField="@name" selectedItemStyleName="none" prompt="eg. Uttar Pradesh" change="validateUs()"
-												selectedItem="{ads.statesOfIndia.states.state.(@name == component.DataSources.AllDataSources.bcMemberDetails.member.@state)}"/>
-			    </ns1:MultiColumnFormItem>
+			    </ns1:MultiColumnFormItem>				    	
 			    <ns1:MultiColumnFormItem label="Country:">
 					<components:AutoComplete 	id="countryName" dataProvider="{new XMLListCollection(ads.countriesOfWorld.countries.country)}" 
 												labelField="@name" selectedItemStyleName="none" prompt="eg. India" change="validateUs()"
 												selectedItem="{ads.countriesOfWorld.countries.country.(@name == component.DataSources.AllDataSources.bcMemberDetails.member.@country)}"/>
+			    </ns1:MultiColumnFormItem>    			    
+			    <ns1:MultiColumnFormItem label="State:" >
+					<components:AutoComplete 	id="stateName" dataProvider="{new XMLListCollection(ads.statesOfIndia.states.state)}" 
+												labelField="@name" selectedItemStyleName="none" prompt="eg. Uttar Pradesh" change="validateUs()"
+												selectedItem="{ads.statesOfIndia.states.state.(@name == component.DataSources.AllDataSources.bcMemberDetails.member.@state)}"/>
 			    </ns1:MultiColumnFormItem>
+			    <ns1:MultiColumnFormItem/>			    
+			    
 			    <mx:HRule width="100%"/>
 			    <ns1:MultiColumnFormItem id="eligibility">
 			    	<mx:CheckBox id="eligibilityCheckBox" label="Special Permission"/>
@@ -225,7 +226,7 @@
 											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
 											specialCharacterNotAllowedError="Special Characters not allowed"
 											numeralNotAllowedError="Please enter alphabets only!" />
-	<CustomClasses:AdvancedStringValidator id="val8" source="{stateName}" property="text" required="true"
+	<CustomClasses:AdvancedStringValidator id="val8" source="{stateName}" property="text" required="{countryName.text == 'India'}"
 											allowSpecialCharacters="false" allowSpaces="true" allowNumbers="false"
 											specialCharacterNotAllowedError="Special Characters not allowed"
 											numeralNotAllowedError="Please enter alphabets only!" />

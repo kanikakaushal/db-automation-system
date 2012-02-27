@@ -243,7 +243,7 @@
 				    <mx:HRule width="100%"/>
 					<ns1:MultiColumnFormItem>
 						<mx:RadioButtonGroup id="radioGroup" selectedValue="0"/>
-						<mx:RadioButton id="radioButtonPrintCard" label="Print TVC" group="{radioGroup}" selected="false" enabled="false"/>
+						<mx:RadioButton id="radioButtonPrintCard" label="Print TVC" group="{radioGroup}" selected="false" />
 					</ns1:MultiColumnFormItem>											
 					<ns1:MultiColumnFormItem>
 						<mx:RadioButton id="radioButtonPrintEnablingStamp" label="Print Enabling Stamp" group="{radioGroup}" selected="true"/>							
