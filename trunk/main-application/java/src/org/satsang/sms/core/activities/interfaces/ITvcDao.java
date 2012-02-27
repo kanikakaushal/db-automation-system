@@ -20,7 +20,7 @@ public interface ITvcDao {
 	public List<TvcMember> getTVCMemberList(String eventId,
 			TvcSearchMember searchTVCRecord);
 
-	public String createTVCRecord(String eventId, String accountId, TvcMember tvcMember, String tvcIdMask);
+	public String createTVCRecord(String eventId, String accountId, TvcMember tvcMember);
 
 	public void createTVCRecordForMember(String eventId, String accountId, TvcMember tvcMember);
 	
