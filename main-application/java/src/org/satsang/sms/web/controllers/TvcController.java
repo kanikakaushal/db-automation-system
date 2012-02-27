@@ -262,13 +262,13 @@ public class TvcController extends AbstractController {
 							log.debug("ASSOCIATES CREATED FOR TVC ID  ------------- "+ tvcId);
 						}
 					
-//						if(memberId != null){
+						if(memberId != null){
 							log.debug("ENABLING STAMP BEING PRINTED FOR TVC ID ---------- "+ tvcMember.getTvcId());						
 							printFactory.getPrinterPool("Label").getPrinter(terminalId).print(event, tvcMember, associations);						
-//						}else{
-//							log.debug("COMPLETE TVC CARD BEING PRINTED FOR TVC ID ---------- "+ tvcMember.getTvcId());
-//							printFactory.getPrinterPool("Card").getPrinter().print(event, tvcMember, associations);
-//						}					
+						}else{
+							log.debug("COMPLETE TVC CARD BEING PRINTED FOR TVC ID ---------- "+ tvcMember.getTvcId());
+							printFactory.getPrinterPool("Card").getPrinter().print(event, tvcMember, associations);
+						}					
 						
 					}
 					
@@ -592,7 +592,7 @@ public class TvcController extends AbstractController {
 			}
 		} else if (uri.endsWith("print.do")) {
 			String tvcId = httpRequest.getParameter(Constants.TVC_ID);
-//			String printLabelOrCard = httpRequest.getParameter(Constants.PRINT_LABEL_OR_CARD);
+			String printLabelOrCard = httpRequest.getParameter(Constants.PRINT_LABEL_OR_CARD);
 			String terminalId = httpRequest.getParameter(Constants.TERMINAL_ID);
 			payload.add(SEARCH_REGISTRATION);
 
@@ -630,11 +630,11 @@ public class TvcController extends AbstractController {
 						searchList = (List<Object>) response.get(1);
 						associateList = (List<TvcAssociateMember>) searchList.get(0);
 					}
-//					if(printLabelOrCard.equals("Label")){
+					if(printLabelOrCard.equals("Label")){
 						printFactory.getPrinterPool("Label").getPrinter(terminalId).print(event, tvc, associateList);
-//					}else if(printLabelOrCard.equals("Card")){
-//						printFactory.getPrinterPool("Card").getPrinter().print(event, tvc, associateList);
-//					}
+					}else if(printLabelOrCard.equals("Card")){
+						printFactory.getPrinterPool("Card").getPrinter().print(event, tvc, associateList);
+					}
 				}
 			}
 		} else if (uri.endsWith("quarters.do")) {

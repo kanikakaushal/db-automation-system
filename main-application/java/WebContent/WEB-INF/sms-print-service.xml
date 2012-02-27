@@ -8,7 +8,7 @@
 		<property name="managedPools">
 			<map>
 				<entry key="Label" value-ref="labelsPool"></entry>
-				<!--entry key="Card" value-ref="cardsPool"></entry-->
+				<entry key="Card" value-ref="cardsPool"></entry>
 			</map>
 		</property>
 	</bean>
@@ -38,13 +38,17 @@
 	<bean id="cardsPool" class="org.satsang.sms.core.util.print.PrinterPool">
 		<property name="pool">
 			<list>
-				<!-- >ref bean="printer3"/-->
+				<ref bean="printer4"/>
 			</list>
 		</property>		
 	</bean>
 	
 	<!-- Printers.... -->
 	<bean id="abstractPdfPrinter" class="org.satsang.sms.core.util.print.JasperPDFPrinter" abstract="true">
+		<property name="tvcDao" ref="TVCIbatisDao"></property>
+	</bean>
+	
+	<bean id="abstractCardPdfPrinter" class="org.satsang.sms.core.util.print.CardPdfPrinter" abstract="true">
 		<property name="tvcDao" ref="TVCIbatisDao"></property>
 	</bean>
 	
@@ -70,10 +74,10 @@
 		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/labels/EnablingStamp.jasper"></property>
 	</bean>
 	
-	<bean id="printer4" parent="abstractPdfPrinter">
+	<bean id="printer4" parent="abstractCardPdfPrinter">
 		<property name="printerName" value="PRINTER4"></property>
-		<property name="printDirectory" value="C:/sms/tvc-cards/labels/PRINTER4"></property>
-		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/labels/EnablingStamp.jasper"></property>
+		<property name="printDirectory" value="C:/sms/tvc-cards/cards/PRINTER4"></property>
+		<property name="pathToJasperTemplate" value="C:/sms/tvc-cards/cards/TVCCard_Complete.jasper"></property>
 	</bean>
 	
 	<!-- >bean id="printer5" parent="abstractCsvLabelPrinter">

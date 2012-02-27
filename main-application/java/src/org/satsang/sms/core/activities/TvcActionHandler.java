@@ -43,13 +43,12 @@ public class TvcActionHandler implements ITvcActionHandler {
 
 	public String register(TvcMember tvcMember, String bhandaraId) {
 		String tvcId = tvcMember.getTvcId();
-		String eventId = (String) configParams.get("eventId");
+		String eventId = (String) configParams.get("eventId");		
+		setState(tvcMember, bhandaraId);		
 		if(tvcId == null){
-//			tvcId = tvcDao.createTVCRecord(eventId, (String) configParams.get("accountId"),
-//					tvcMember, (String) configParams.get("tvcIdMask"));
-//			tvcMember.setTvcId(tvcId);			
+			tvcId = tvcDao.createTVCRecord(eventId, (String) configParams.get("accountId"),
+					tvcMember);			
 		}else{
-			setState(tvcMember, bhandaraId);
 			TvcSearchMember searchCriteria = new TvcSearchMember();
 			searchCriteria.setTvcId(tvcId);
 			List<TvcMember> searchResult = tvcDao.getTVCMemberList(eventId, searchCriteria);

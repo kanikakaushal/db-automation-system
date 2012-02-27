@@ -65,8 +65,7 @@ public class TvcIbatisDao implements ITvcDao {
 		return memberList;
 	}
 
-	public String createTVCRecord(String eventId, String accountId, TvcMember tvcMember,
-			String tvcIdMask) {
+	public String createTVCRecord(String eventId, String accountId, TvcMember tvcMember) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("instanceId", tvcMember.getBranchId());
 				
@@ -75,7 +74,7 @@ public class TvcIbatisDao implements ITvcDao {
 			seqNo = 1;
 		}
 
-		String tvcId = tvcMember.getBranchId() + "1" + padZeros(seqNo.toString());
+		String tvcId = tvcMember.getBranchId() + "7" + padZeros(seqNo.toString()) + "M";
 		tvcMember.setTvcId(tvcId);
 		params.put("tvc", tvcMember);
 		params.put("eventId", eventId);
@@ -137,7 +136,7 @@ public class TvcIbatisDao implements ITvcDao {
 			String tvcIdList = "(";
 			for (int index = 0; index < oldAssociates.size(); index ++) {
 				TvcAssociateMember member = oldAssociates.get(index);
-				tvcIdList += member.getAssociateTvcId();
+				tvcIdList += "'"+member.getAssociateTvcId()+"'";
 				if(index != oldAssociates.size() - 1){
 					tvcIdList += ",";
 				}
@@ -156,7 +155,7 @@ public class TvcIbatisDao implements ITvcDao {
 			String insertClause = "";
 			String tvcIdList = "(";
 			for (TvcAssociateMember member : newAssociations) {
-				tvcIdList += member.getAssociateTvcId();
+				tvcIdList += "'"+member.getAssociateTvcId()+"'";
 				if (newAssociations.indexOf(member) != newAssociations.size() - 1){
 					insertClause += "('" + eventId + "', '" + tvcId + "', '"
 							+ member.getAssociateTvcId() + "', '"
