@@ -92,10 +92,13 @@
 	    eligibilityCheckBox.selected = false;
 		eligibilityDetailsTextBox.text = "";
 		lAccoType.selectedIndex = -1;
+		lAccoType.prompt = "Select One";
 		accoDetailsComboBox.selectedIndex = -1;
 		accoDetailsComboBox.prompt = "Select One";
 		component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = -1;
 		component.DataSources.AllDataSources.smartAssistLAddressSelected = "";
+		component.DataSources.AllDataSources.smartAssistAccoTypeIndex = -1;
+		component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;
 		lAddress.text = "";
 		toDate.selectedDate = null;
 		childCount.selectedIndex = 0;
@@ -105,7 +108,8 @@
 		assocToPrimaryRel.prompt = "Relation";
 		component.DataSources.AllDataSources.licenseeDetails = "";
 		licenseeRelation.prompt =  "Relation";
-		lblLicenseeRelation.visible = false;
+		//lblLicenseeRelation.visible = false;
+		//lblLicenseeName.visible = false;
 		licenseeRelation.selectedItem = null;
 		isBarCodedTVCAvailable.selected = false;
 		bcMemberID.text = "";

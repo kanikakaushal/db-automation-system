@@ -7,27 +7,31 @@
 <!-- Include the ActionScript File containing all the Functions -->		
 		<mx:Script source="ActionScript/NewRegistration.as"/>
 		<mx:Script source="ActionScript/SmartAssist.as"/>
-	<mx:Script>
-		<![CDATA[
-			import mx.collections.XMLListCollection;
-			import mx.core.Application;
-		]]>
-	</mx:Script>
+		<mx:Script>
+			<![CDATA[
+				import mx.collections.XMLListCollection;
+				import mx.core.Application;
+			]]>
+		</mx:Script>
 		
-	<mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+	<mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" paddingBottom="10" paddingLeft="10" 
+		paddingRight="10" paddingTop="10">
 		<mx:VBox height="10%" width="100%" verticalAlign="middle" horizontalAlign="center">
 			<mx:HBox>
 				<mx:VBox height="100%" width="50%" verticalAlign="middle" horizontalAlign="left" borderStyle="solid"
 						paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
 					<mx:RadioButtonGroup id="radioGroup" selectedValue="0"/>
-					<mx:RadioButton id="radioButtonIsPrimary" label="Primary TVC" group="{radioGroup}" selected="true" click="handlePrimaryRadioButtonClick();"/>
+					<mx:RadioButton id="radioButtonIsPrimary" 
+						label="Primary TVC" group="{radioGroup}" selected="true" click="handlePrimaryRadioButtonClick();"/>
 					<mx:HBox verticalAlign="middle" width="100%">
-				        <mx:RadioButton id="radioButtonIsAssociate" label="Associate TVC" group="{radioGroup}" width="30%"  click="handleAssociateRadioButtonClick();"/>
+				        <mx:RadioButton id="radioButtonIsAssociate" 
+				        	label="Associate TVC" group="{radioGroup}" width="30%"  click="handleAssociateRadioButtonClick();"/>
 						<mx:Spacer width="50%"/>
 						<mx:HBox id="aRelationHBox" visible="{radioButtonIsAssociate.selected}" verticalAlign="middle" width="70%">
 							<mx:Label text="Relation to primary"/>
-							<components:AutoComplete 	id="assocToPrimaryRel" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
-														labelField="@label" selectedItemStyleName="none" prompt="Relation" allowNewValues="true" change="validateUs()"/>				
+							<components:AutoComplete 	id="assocToPrimaryRel" 
+								dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
+								labelField="@label" selectedItemStyleName="none" prompt="Relation" allowNewValues="true" change="validateUs()"/>				
 							<mx:Spacer width="100%"/>
 							<mx:Label text="Associations Recorded: {component.DataSources.AllDataSources.assocCount}"/>
 						</mx:HBox>
@@ -35,9 +39,11 @@
 				</mx:VBox>
 				<mx:VBox height="100%" width="50%" verticalAlign="middle" horizontalAlign="left" borderStyle="solid"
 							paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
-					<mx:CheckBox label="Barcoded Member ID Available" id="isBarCodedTVCAvailable" click="setFocusOnTextBox()" change="resetBCEntries()"/>
+					<mx:CheckBox label="Barcoded Member ID Available" id="isBarCodedTVCAvailable" click="setFocusOnTextBox()" 
+						change="resetBCEntries()"/>
 			    <ns1:MultiColumnFormItem label="Member ID" visible="{isBarCodedTVCAvailable.selected}">			
-			        <mx:TextInput id="bcMemberID" enter="getMemberDetails()" width="{cellWidth}" visible="{isBarCodedTVCAvailable.selected}" change=""/>
+			        <mx:TextInput id="bcMemberID" enter="getMemberDetails()" width="{cellWidth}" 
+			        	visible="{isBarCodedTVCAvailable.selected}" change=""/>
 			    </ns1:MultiColumnFormItem>			    
 				</mx:VBox>
 			</mx:HBox>
@@ -57,28 +63,39 @@
 			        	text="{component.DataSources.AllDataSources.bcMemberDetails.member.@lastName}"/>
 			    </ns1:MultiColumnFormItem>
 			    <ns1:MultiColumnFormItem label="Gender:">
-					<components:AutoComplete 	id="genderType" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.genderChoice.gender.gender)}" 
-												labelField="@label" selectedItemStyleName="none" prompt="Select" width="{cellWidth}" updateComplete="validateUs()"
-												selectedItem="{component.DataSources.AllDataSources.genderChoice.gender.gender.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@gender)}"/>
+					<components:AutoComplete 	id="genderType" 
+						dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.genderChoice.gender.gender)}" 
+						labelField="@label" selectedItemStyleName="none" prompt="Select" width="{cellWidth}" updateComplete="validateUs()"
+						selectedItem="{component.DataSources.AllDataSources.genderChoice.gender.gender.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@gender)}"/>
 			    </ns1:MultiColumnFormItem>			    
 			    <ns1:MultiColumnFormItem label="Init. Status:">
-					<components:AutoComplete 	id="initStatus" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.initiatedStatus.initiatedStatus.status)}" 
-												labelField="@label" selectedItemStyleName="none" prompt="Select" searchChange="checkStatus()" width="{cellWidth}"
-												selectedItem="{component.DataSources.AllDataSources.initiatedStatus.initiatedStatus.status.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@initiationStatus)}"/>
+					<components:AutoComplete 	id="initStatus" 
+						dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.initiatedStatus.initiatedStatus.status)}" 
+						labelField="@label" selectedItemStyleName="none" prompt="Select" searchChange="checkStatus()" width="{cellWidth}"
+						selectedItem="{component.DataSources.AllDataSources.initiatedStatus.initiatedStatus.status.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@initiationStatus)}"/>
 			    </ns1:MultiColumnFormItem>
-			   <ns1:MultiColumnFormItem label="Init. Parent/Spouse Name:" visible="{component.DataSources.AllDataSources.isMemberUninitiated}" id="lblInitParentName">
-			        <components:PromptTextInput id="initParentName" prompt="e.g. Pb. V.M. Kumar" visible="{component.DataSources.AllDataSources.isMemberUninitiated}" width="{cellWidth}" updateComplete="validateUs()"
-			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@initiatedParent}"/>
+			   <ns1:MultiColumnFormItem label="Init. Parent/Spouse Name:" visible="{component.DataSources.AllDataSources.isMemberUninitiated}" 
+			   		id="lblInitParentName">
+			        <components:PromptTextInput id="initParentName" 
+			        	prompt="e.g. Pb. V.M. Kumar" visible="{component.DataSources.AllDataSources.isMemberUninitiated}" 
+			        	width="{cellWidth}" updateComplete="validateUs()"
+			        	text="{component.DataSources.AllDataSources.bcMemberDetails.member.@initiatedParent}"/>
 			    </ns1:MultiColumnFormItem>    
-			   <ns1:MultiColumnFormItem label="Age:" visible="{component.DataSources.AllDataSources.isMemberJigyasu || component.DataSources.AllDataSources.isMemberUninitiated}" id="ageLabel">
-			        <components:PromptTextInput id="age" prompt="Age (15yrs+)" visible="{component.DataSources.AllDataSources.isMemberJigyasu || component.DataSources.AllDataSources.isMemberUninitiated}" width="{cellWidth}" updateComplete="validateUs()"
-			        							text="{component.DataSources.AllDataSources.bcMemberDetails.member.@age}"/>
+			   <ns1:MultiColumnFormItem label="Age:" id="ageLabel"  
+			   		visible="{component.DataSources.AllDataSources.isMemberJigyasu || component.DataSources.AllDataSources.isMemberUninitiated}">
+			        <components:PromptTextInput id="age" prompt="Age (15yrs+)" 
+			        	visible="{component.DataSources.AllDataSources.isMemberJigyasu || component.DataSources.AllDataSources.isMemberUninitiated}" 
+			        	width="{cellWidth}" updateComplete="validateUs()" 
+			        	text="{component.DataSources.AllDataSources.bcMemberDetails.member.@age}"/>
 			    </ns1:MultiColumnFormItem>
-			   <ns1:MultiColumnFormItem label="Occupation:" visible="{!component.DataSources.AllDataSources.isMemberInitiated}" id="occupationLabel">
-			        <components:AutoComplete 	id="occupation" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.occupation.occupation.category)}" allowNewValues="true"
-												labelField="@label" selectedItemStyleName="none" prompt="Select" visible="{!component.DataSources.AllDataSources.isMemberInitiated}"
-												selectedItem="{component.DataSources.AllDataSources.occupation.occupation.category.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@occupation)}" 
-												updateComplete="validateUs()" width="{cellWidth}"/>
+			   <ns1:MultiColumnFormItem label="Occupation:" 
+			   		visible="{!component.DataSources.AllDataSources.isMemberInitiated}" id="occupationLabel">
+			        <components:AutoComplete 	id="occupation" 
+			        	dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.occupation.occupation.category)}" 
+			        	allowNewValues="true" labelField="@label" selectedItemStyleName="none" prompt="Select" 
+			        	visible="{!component.DataSources.AllDataSources.isMemberInitiated}" 
+			        	selectedItem="{component.DataSources.AllDataSources.occupation.occupation.category.(@label == component.DataSources.AllDataSources.bcMemberDetails.member.@occupation)}" 
+						updateComplete="validateUs()" width="{cellWidth}"/>
 			    </ns1:MultiColumnFormItem>
 			   <ns1:MultiColumnFormItem id="lblLetterNumber" label="Letter Number:" visible="{component.DataSources.AllDataSources.isMemberJigyasu}">
 <!--			        <components:AutoComplete 	id="acRecommendation" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.jigyasuRecommendation.recommendations.recommendation)}" allowNewValues="true"
@@ -166,8 +183,11 @@
 						visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}"/>
 			    </ns1:MultiColumnFormItem>
 			    <ns1:MultiColumnFormItem id="lblLicenseeRelation" label="Relation:" visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}">
-							<components:AutoComplete 	id="licenseeRelation" dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
-														labelField="@label" selectedItemStyleName="none" prompt="Relation" visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}" updateComplete="validateUs()" allowNewValues="true"/>				
+					<components:AutoComplete id="licenseeRelation" 
+						dataProvider="{new XMLListCollection(component.DataSources.AllDataSources.assocToPrimaryTVCRelation.relationships.relationship)}" 
+						labelField="@label" selectedItemStyleName="none" prompt="Relation" 
+						visible="{component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown}" 
+						updateComplete="validateUs()" allowNewValues="true"/>				
 			    </ns1:MultiColumnFormItem>
 			    <mx:HRule width="100%"/>
 			    <ns1:MultiColumnFormItem label="Stay Till:">			    		
@@ -244,7 +264,8 @@
 	<CustomClasses:AdvancedStringValidator id="val12" source="{initStatus}" property="text" required="true"
 											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
 											numeralNotAllowedError="Please enter alphabets only!" />
-	<mx:NumberValidator id="val13" source="{accoDetailsComboBox}" lowerThanMinError="This field is required." property="selectedIndex" minValue="0" />
+	<mx:NumberValidator id="val13" source="{accoDetailsComboBox}" lowerThanMinError="This field is required." property="selectedIndex" 
+		minValue="0" />
 	<CustomClasses:AdvancedStringValidator id="val14" source="{letterNumber}" property="text" required="true"
 											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
 											numeralNotAllowedError="Please enter alphabets only!" />
