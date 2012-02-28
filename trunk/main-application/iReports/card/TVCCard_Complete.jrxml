@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="aLabelTest" language="groovy" pageWidth="288" pageHeight="216" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="288" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Event_Name" class="java.lang.String"/>
+	<parameter name="Event_Description" class="java.lang.String"/>
+	<parameter name="TVC_ID" class="java.lang.String"/>
+	<parameter name="Name" class="java.lang.String"/>
+	<parameter name="Branch_Name" class="java.lang.String"/>
+	<parameter name="Region_Name" class="java.lang.String"/>
+	<parameter name="Is_Duplicate" class="java.lang.String"/>
+	<parameter name="DB_Address" class="java.lang.String"/>
+	<parameter name="M" class="java.lang.String"/>
+	<parameter name="F" class="java.lang.String"/>
+	<parameter name="C" class="java.lang.String"/>
+	<parameter name="From_Date" class="java.lang.String"/>
+	<parameter name="To_Date" class="java.lang.String"/>
+	<parameter name="Show_Bhandara_Number" class="java.lang.String"/>
+	<parameter name="Applied_For_Initiation" class="java.lang.String"/>
+	<parameter name="Init_Letter_Number" class="java.lang.String"/>
+	<parameter name="Bhandara_Number" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 1]]>
+	</queryString>
+	<field name="1" class="java.lang.Long"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="214" splitType="Stretch">
+			<rectangle>
+				<reportElement positionType="Float" x="3" y="3" width="283" height="209"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="3" y="149" width="283" height="63"/>
+			</rectangle>
+			<textField>
+				<reportElement x="74" y="57" width="100" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Name}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="3" y="51" width="283" height="1"/>
+			</line>
+			<staticText>
+				<reportElement x="28" y="57" width="46" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Name    :	]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="28" y="71" width="46" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Branch  :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="28" y="86" width="46" height="13"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Region  :]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="61" y="101" width="197" height="44"/>
+				<jr:Code128 xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" textPosition="bottom">
+					<jr:codeExpression><![CDATA[$P{TVC_ID}]]></jr:codeExpression>
+				</jr:Code128>
+			</componentElement>
+			<textField>
+				<reportElement x="74" y="71" width="100" height="13"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Branch_Name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="74" y="86" width="100" height="13"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Region_Name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="3" y="3" width="283" height="15"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" isItalic="false" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Dayalbagh Temporary Visitor Card]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="245" y="5" width="39" height="11" forecolor="#FFFFFF" backcolor="#000000">
+					<printWhenExpression><![CDATA[$P{Is_Duplicate}.equals('true')]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Duplicate]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="3" y="18" width="283" height="16"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" isItalic="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Event_Name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="73" y="34" width="143" height="16" forecolor="#FFFFFF" backcolor="#000000"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" isItalic="false"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Event_Description}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement positionType="Float" x="31" y="154" width="227" height="52"/>
+				<subreportParameter name="Applied_For_Initiation">
+					<subreportParameterExpression><![CDATA[$P{Applied_For_Initiation}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="F">
+					<subreportParameterExpression><![CDATA[$P{F}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="From_Date">
+					<subreportParameterExpression><![CDATA[$P{From_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="C">
+					<subreportParameterExpression><![CDATA[$P{C}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="M">
+					<subreportParameterExpression><![CDATA[$P{M}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_Description">
+					<subreportParameterExpression><![CDATA[$P{Event_Description}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="To_Date">
+					<subreportParameterExpression><![CDATA[$P{To_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="DB_Address">
+					<subreportParameterExpression><![CDATA[$P{DB_Address}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Is_Duplicate">
+					<subreportParameterExpression><![CDATA[$P{Is_Duplicate}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Region_Name">
+					<subreportParameterExpression><![CDATA[$P{Region_Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Branch_Name">
+					<subreportParameterExpression><![CDATA[$P{Branch_Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Name">
+					<subreportParameterExpression><![CDATA[$P{Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Show_Bhandara_Number">
+					<subreportParameterExpression><![CDATA[$P{Show_Bhandara_Number}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Init_Letter_Number">
+					<subreportParameterExpression><![CDATA[$P{Init_Letter_Number}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Bhandara_Number">
+					<subreportParameterExpression><![CDATA[$P{Bhandara_Number}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="TVC_ID">
+					<subreportParameterExpression><![CDATA[$P{TVC_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_Name">
+					<subreportParameterExpression><![CDATA[$P{Event_Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["EnablingStamp.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
