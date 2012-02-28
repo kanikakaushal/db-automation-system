@@ -153,7 +153,9 @@ public class CardPdfPrinter implements IPrinter {
 		if (tvc.getMiddleName() != null) {
 			name += tvc.getMiddleName() + " ";
 		}
-		name += tvc.getLastName();
+		if (tvc.getLastName() != null) {
+			name += tvc.getLastName();
+		}		
 		parameters.put("Name", name);
 		parameters.put("Branch_Name", tvc.getBranchName());
 		parameters.put("Region_Name", tvc.getRegionName());
