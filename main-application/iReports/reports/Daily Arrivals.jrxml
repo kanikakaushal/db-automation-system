@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Daily Arrivals" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="832" leftMargin="5" rightMargin="5" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.8181818181818183"/>
+	<property name="ireport.x" value="77"/>
+	<property name="ireport.y" value="121"/>
+	<style name="Title" forecolor="#FFFFFF" fontName="Times New Roman" fontSize="50" isBold="false" pdfFontName="Times-Bold"/>
+	<style name="SubTitle" forecolor="#666666" fontName="Times New Roman" fontSize="18" isBold="false" pdfFontName="Times-Roman"/>
+	<style name="Column header" forecolor="#666666" fontName="Times New Roman" fontSize="14" isBold="true" pdfFontName="Times-Roman"/>
+	<style name="Detail" mode="Transparent" fontName="Times New Roman" pdfFontName="Times-Roman"/>
+	<style name="Row" mode="Transparent" fontName="Times New Roman" pdfFontName="Times-Roman">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F0EFEF"/>
+		</conditionalStyle>
+	</style>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<subDataset name="PieChartDataset"/>
+	<parameter name="Event_Name" class="java.lang.String"/>
+	<parameter name="Event_ID" class="java.lang.String"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["./"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="From_Date" class="java.lang.String"/>
+	<parameter name="To_Date" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+	TA1.TVC_ID 'SOURCE_TVCId',
+	TVCR.Member_Initiation_Status,
+	CASE
+		WHEN TVCR.Member_Gender = 'Male' THEN 'M'
+		WHEN TVCR.Member_Gender = 'Female' THEN 'F'
+	END AS 'Gender',
+	CASE
+		WHEN TVCR.Member_Initiation_Status = 'Jigyasu' THEN 'J'
+		WHEN TVCR.Member_Initiation_Status = 'Uninitiated' THEN 'NI'
+		ELSE ''
+	END AS 'Initiation_Status',
+	CASE
+	        WHEN TVCR.PERMISSION_TYPE = 'Special Permission' THEN 'SP'
+        	ELSE ' '
+	END AS 'Perm_Type',
+	CASE
+        WHEN TA1.TVC_ID = TA1.ASSOCIATE_TVC_ID THEN TA1.ASSOCIATE_TVC_ID
+        ELSE CONCAT('   ',  TA1.ASSOCIATE_TVC_ID)
+      END AS 'TVC Id' ,
+      CASE
+	WHEN TVCR.MEMBER_INITIATION_STATUS = 'Initiated' AND TVCR.Member_Gender = 'Male' THEN UPPER(CONCAT("Pb. ", TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+	WHEN TVCR.MEMBER_INITIATION_STATUS = 'Initiated' AND TVCR.Member_Gender = 'Female' THEN UPPER(CONCAT("Pbn. ", TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+	WHEN TVCR.MEMBER_INITIATION_STATUS = 'Jigyasu' AND TVCR.Member_Gender = 'Male'
+		THEN UPPER(CONCAT("Mr. ", TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+	WHEN TVCR.MEMBER_INITIATION_STATUS = 'Jigyasu' AND TVCR.Member_Gender = 'Female'
+		THEN UPPER(CONCAT("Ms. ", TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+	WHEN TVCR.MEMBER_INITIATION_STATUS = 'Uninitiated' AND TVCR.Member_Gender = 'Male'
+		THEN UPPER(CONCAT("Mr. ", TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+	WHEN TVCR.MEMBER_INITIATION_STATUS = 'Uninitiated' AND TVCR.Member_Gender = 'Female'
+		THEN UPPER(CONCAT("Ms. ", TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+	ELSE UPPER(CONCAT(TVCR.MEMBER_FIRST_NAME, " ", IFNULL(TVCR.MEMBER_MIDDLE_NAME,""), " ", IFNULL(TVCR.MEMBER_LAST_NAME,"")))
+      END AS 'Name',
+      CASE
+        WHEN TA1.RELATIONSHIP_TYPE = 'Self' THEN ''
+        WHEN TA1.RELATIONSHIP_TYPE = 'Mother' THEN 'M'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Father' THEN 'F'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Wife' THEN 'W'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Husband' THEN 'H'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Son' THEN 'S'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Daughter' THEN 'D'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Grandson' THEN 'GS'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Grand Daughter' THEN 'GD'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Son In Law' THEN 'Son-I-L'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Sister In Law' THEN 'Sis-In-Law'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Brother In Law' THEN 'B-I-L'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Daughter In Law' THEN 'D-I-L'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Co Brother' THEN 'Co-Br'
+        WHEN TA1.RELATIONSHIP_TYPE = 'Co Sis' THEN 'Co-Sis'
+        ELSE TA1.RELATIONSHIP_TYPE
+      END AS 'Relationship',
+      (select INSTANCE_NAME from SMS.COMMUNITY_INSTANCE BT WHERE TVCR.MEMBER_BRANCH_ID = BT.INSTANCE_ID) AS 'Branch',
+      (select INSTANCE_SUFFIX from SMS.COMMUNITY_INSTANCE DT WHERE TVCR.MEMBER_DISTRICT_ID = DT.INSTANCE_ID) AS 'District',
+      TVCR.HOME_STATE_TYPE AS 'State',
+	Date_Format(TVCR.MEMBER_STAY_fromDATE, '%d-%m-%y') as 'Arr Date',
+      Date_Format(TVCR.MEMBER_STAY_TODATE, '%d-%m-%y') as 'Dep Date',
+      CASE
+        WHEN TVCR.MEMBER_GENDER = 'Male' THEN '1'
+        ELSE ''
+      END AS 'M',
+      CASE
+        WHEN TVCR.MEMBER_GENDER = 'Female' THEN '1'
+        ELSE ''
+      END AS 'F',
+      CASE
+        WHEN TVCR.MEMBER_CHILDREN_COUNT = '0' THEN ' '
+        ELSE CONCAT(CONVERT(TVCR.MEMBER_CHILDREN_COUNT using UTF8), " (", IFNULL(TVCR.MEMBER_CHILDREN_AGES,""), ")")
+      END AS 'C',
+	CASE
+	        WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' THEN 'SDN'
+	        WHEN TVCR.MEMBER_STAY_CATEGORY = 'Private Quarters' THEN 'PQ'
+		WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sabha Quarters' THEN 'SQ'
+		WHEN TVCR.MEMBER_STAY_CATEGORY = 'Outside Dayalbagh' THEN 'OD'
+	END AS 'Acco_Type',
+      CASE
+        WHEN TVCR.MEMBER_STAY_CATEGORY = 'Private Quarters' OR TVCR.MEMBER_STAY_CATEGORY = 'Sabha Quarters'
+		THEN CONCAT(TVCR.MEMBER_LOCAL_ADDRESS)
+        WHEN TVCR.MEMBER_STAY_CATEGORY = 'Outside Dayalbagh'
+		THEN CONCAT(TVCR.MEMBER_LOCAL_COLONY)
+        WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'Yatri Sadan' THEN 'YS'
+	WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'Old Exhibition Complex' THEN 'OEC'
+	WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'Pilgrim Shed' THEN 'PS'
+	WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'New Day Boarding School' THEN 'NDBS'
+	WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'Old Day Boarding School' THEN 'ODBS'
+	WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'Dormitory' THEN 'DOR'
+	WHEN TVCR.MEMBER_STAY_CATEGORY = 'Sadan' AND TVCR.MEMBER_LOCAL_ADDRESS = 'Youth Hostem' THEN 'YH'
+	ELSE TVCR.MEMBER_LOCAL_ADDRESS
+      END AS 'Local_Address', TVCR.Member_Age as 'Age',
+	CASE
+		WHEN TVCR.Member_Initiation_Status = 'Initiated' AND TVCR.MEMBER_STAY_CATEGORY = 'Private Quarters' AND TVCR.IS_ASSOCIATE != '1' THEN
+			CONCAT(IFNULL(TVCR.PQ_LICENSEE_RELATION,""), " of ", IFNULL((
+SELECT LD.LICENSEE_NAME
+from SMS.db_private_quarter LD
+where (LD.QUARTER_NO = TVCR.MEMBER_LOCAL_ADDRESS OR TVCR.MEMBER_LOCAL_ADDRESS = CONCAT(LD.QUARTER_NO, ",", LD.COLONY_NAME))
+AND LD.ASSOCIATED_COLONY_NAME = TVCR.MEMBER_LOCAL_COLONY
+),""))
+		WHEN (TVCR.Member_Initiation_Status = 'Uninitiated') AND TVCR.MEMBER_STAY_CATEGORY != 'Private Quarters' THEN
+			CONCAT("SP, ", IFNULL(CONVERT(TVCR.MEMBER_AGE using UTF8),""), " yrs., ", IFNULL(TVCR.MEMBER_OCCUPATION,""))
+		WHEN (TVCR.Member_Initiation_Status = 'Uninitiated') AND TVCR.MEMBER_STAY_CATEGORY = 'Private Quarters' AND TVCR.PQ_LICENSEE_RELATION IS NOT NULL AND TVCR.IS_ASSOCIATE != '1' THEN
+			CONCAT("SP, ",IFNULL(CONVERT(TVCR.MEMBER_AGE using UTF8),""), " yrs., ", IFNULL(TVCR.MEMBER_OCCUPATION,""), ", ", IFNULL(TVCR.PQ_LICENSEE_RELATION,""), " of ", IFNULL((
+SELECT LD.LICENSEE_NAME from SMS.db_private_quarter LD
+where (LD.QUARTER_NO = TVCR.MEMBER_LOCAL_ADDRESS OR TVCR.MEMBER_LOCAL_ADDRESS = CONCAT(LD.QUARTER_NO, ",", LD.COLONY_NAME))
+AND LD.ASSOCIATED_COLONY_NAME = TVCR.MEMBER_LOCAL_COLONY
+),""))
+		WHEN (TVCR.Member_Initiation_Status = 'Jigyasu') AND TVCR.MEMBER_STAY_CATEGORY != 'Private Quarters' THEN
+			CONCAT(IFNULL(CONVERT(TVCR.MEMBER_AGE using UTF8),""), " yrs., ", IFNULL(TVCR.MEMBER_OCCUPATION,"")," ", IFNULL(TVCR.JIGYASU_LETTER_NO,""))
+		WHEN (TVCR.Member_Initiation_Status = 'Jigyasu') AND TVCR.MEMBER_STAY_CATEGORY = 'Private Quarters' AND TVCR.PQ_LICENSEE_RELATION IS NOT NULL AND TVCR.IS_ASSOCIATE != '1' THEN
+			CONCAT(IFNULL(CONVERT(TVCR.MEMBER_AGE using UTF8),""), " yrs., ", IFNULL(TVCR.MEMBER_OCCUPATION,""), ", ", IFNULL(TVCR.PQ_LICENSEE_RELATION,""), " of ", IFNULL((
+SELECT LD.LICENSEE_NAME from SMS.db_private_quarter LD
+where (LD.QUARTER_NO = TVCR.MEMBER_LOCAL_ADDRESS OR TVCR.MEMBER_LOCAL_ADDRESS = CONCAT(LD.QUARTER_NO, ",", LD.COLONY_NAME))
+AND LD.ASSOCIATED_COLONY_NAME = TVCR.MEMBER_LOCAL_COLONY
+),"")," ", IFNULL(TVCR.JIGYASU_LETTER_NO,""))
+	END as 'Remarks'
+FROM sms_activities.tvc_record TVCR,
+(
+SELECT T1.EVENT_ID EVENT_ID,
+CAST(T2.TVC_ID AS UNSIGNED) TVC_ID_INT,
+T2.TVC_ID TVC_ID,
+T2.ASSOCIATE_TVC_ID ASSOCIATE_TVC_ID ,
+T2.ASSOCIATE_RELATIONSHIP RTYPE,
+'L2' LEVELTYPE,
+T2.ASSOCIATE_RELATIONSHIP RELATIONSHIP_TYPE
+FROM sms_activities.TVC_RECORD T1, sms_activities.TVC_ASSOCIATIONS T2
+WHERE T1.EVENT_ID = T2.EVENT_ID AND T1.TVC_ID =  T2.ASSOCIATE_TVC_ID AND T1.EVENT_ID = $P{Event_ID}
+AND date_format(T1.MEMBER_STAY_FROMDATE,'%Y-%m-%d %H:%i') >= $P{From_Date}
+AND date_format(T1.MEMBER_STAY_FROMDATE,'%Y-%m-%d %H:%i') <= $P{To_Date}
+UNION
+SELECT T3.EVENT_ID EVENT_ID, CAST(T3.TVC_ID AS UNSIGNED) TVC_ID_INT, T3.TVC_ID TVC_ID , T3.TVC_ID ASSOCIATE_TVC_ID , 'SELF' RTYPE, 'L1' LEVELTYPE,  'Self' RELATIONSHIP_TYPE
+FROM sms_activities.TVC_RECORD T3
+WHERE T3.EVENT_ID = $P{Event_ID}
+AND date_format(T3.MEMBER_STAY_FROMDATE,'%Y-%m-%d %H:%i') >= $P{From_Date}
+AND date_format(T3.MEMBER_STAY_FROMDATE,'%Y-%m-%d %H:%i') <= $P{To_Date}
+
+AND NOT EXISTS
+(
+SELECT T5.ASSOCIATE_TVC_ID ASSOCIATE_TVC_ID
+FROM sms_activities.TVC_RECORD T4, sms_activities.TVC_ASSOCIATIONS T5
+WHERE  T4.EVENT_ID = T5.EVENT_ID AND T3.EVENT_ID = T4.EVENT_ID AND T4.TVC_ID =  T5.ASSOCIATE_TVC_ID
+AND T4.EVENT_ID = $P{Event_ID}
+AND date_format(T4.MEMBER_STAY_FROMDATE,'%Y-%m-%d %H:%i') >= $P{From_Date}
+AND date_format(T4.MEMBER_STAY_FROMDATE,'%Y-%m-%d %H:%i') <= $P{To_Date}
+AND T4.TVC_ID = T3.TVC_ID)
+) TA1
+WHERE TA1.ASSOCIATE_TVC_ID = TVCR.TVC_ID
+AND TA1.EVENT_ID = TVCR.EVENT_ID
+ORDER BY TA1.TVC_ID_INT, TA1.LEVELTYPE]]>
+	</queryString>
+	<field name="SOURCE_TVCId" class="java.lang.String"/>
+	<field name="Member_Initiation_Status" class="java.lang.String"/>
+	<field name="Gender" class="java.lang.String"/>
+	<field name="Initiation_Status" class="java.lang.String"/>
+	<field name="Perm_Type" class="java.lang.String"/>
+	<field name="TVC Id" class="java.lang.String"/>
+	<field name="Name" class="java.lang.String"/>
+	<field name="Relationship" class="java.lang.String"/>
+	<field name="Branch" class="java.lang.String"/>
+	<field name="District" class="java.lang.String"/>
+	<field name="State" class="java.lang.String"/>
+	<field name="Arr Date" class="java.lang.String"/>
+	<field name="Dep Date" class="java.lang.String"/>
+	<field name="M" class="java.lang.String"/>
+	<field name="F" class="java.lang.String"/>
+	<field name="C" class="java.lang.String"/>
+	<field name="Acco_Type" class="java.lang.String"/>
+	<field name="Local_Address" class="java.lang.String"/>
+	<field name="Age" class="java.lang.Integer"/>
+	<field name="Remarks" class="java.lang.String"/>
+	<group name="Source_TVCID">
+		<groupExpression><![CDATA[$F{SOURCE_TVCId}]]></groupExpression>
+		<groupFooter>
+			<band height="5">
+				<frame>
+					<reportElement mode="Opaque" x="0" y="1" width="828" height="3" forecolor="#FFFFFF" backcolor="#999999"/>
+					<box>
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="0.0"/>
+						<rightPen lineWidth="0.0"/>
+					</box>
+				</frame>
+			</band>
+		</groupFooter>
+	</group>
+	<title>
+		<band height="110" splitType="Stretch">
+			<staticText>
+				<reportElement x="162" y="37" width="449" height="25"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Pilgrim Arrival Details]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="162" y="7" width="449" height="26"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="true" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{Event_Name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="162" y="66" width="449" height="26"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Date: " + $P{From_Date} + " To: " + $P{To_Date}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="23" splitType="Stretch">
+			<elementGroup>
+				<frame>
+					<reportElement mode="Opaque" x="0" y="0" width="832" height="19" forecolor="#F0EAEA" backcolor="#F0EAEA"/>
+					<staticText>
+						<reportElement x="139" y="0" width="121" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Name]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="27" y="0" width="107" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[TVC]]></text>
+					</staticText>
+					<elementGroup/>
+					<staticText>
+						<reportElement x="260" y="0" width="42" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Rel]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="302" y="0" width="84" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Branch]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="386" y="0" width="51" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Dist]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="437" y="0" width="33" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[State]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="470" y="0" width="65" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Dep]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="535" y="0" width="58" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[C]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="592" y="0" width="25" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Qtr]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="623" y="0" width="74" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement textAlignment="Center" verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Address]]></text>
+					</staticText>
+					<staticText>
+						<reportElement x="697" y="0" width="135" height="19" forecolor="#000000" backcolor="#000000"/>
+						<textElement verticalAlignment="Middle">
+							<font fontName="Calibri" size="14" isBold="true"/>
+						</textElement>
+						<text><![CDATA[Remarks]]></text>
+					</staticText>
+				</frame>
+			</elementGroup>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<textField>
+				<reportElement x="27" y="0" width="107" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{TVC Id}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="">
+				<reportElement stretchType="RelativeToBandHeight" x="139" y="0" width="121" height="17" isPrintInFirstWholeBand="true" isPrintWhenDetailOverflows="true"/>
+				<textElement verticalAlignment="Top">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="27" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Initiation_Status}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="0" width="42" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Relationship}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="302" y="0" width="84" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Branch}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="386" y="0" width="51" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{District}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="437" y="0" width="33" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{State}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="470" y="0" width="64" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Dep Date}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="534" y="0" width="58" height="17" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{C}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="592" y="0" width="25" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Acco_Type}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="623" y="0" width="74" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Local_Address}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="697" y="0" width="131" height="17"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="697" y="0" width="131" height="17" isPrintWhenDetailOverflows="true"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Remarks}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="18" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="16" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="2" y="0" width="830" height="16" forecolor="#D0B48E" backcolor="#006699"/>
+				<textField>
+					<reportElement x="706" y="0" width="80" height="16" forecolor="#FFFFFF"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+				</textField>
+				<textField evaluationTime="Report">
+					<reportElement x="786" y="0" width="40" height="16" forecolor="#FFFFFF"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="11" y="0" width="486" height="16" forecolor="#FFFFFF"/>
+					<textElement/>
+					<text><![CDATA[Legend - NI: Not Initiated, J: Jigyasu, xx/yyy/zz (eg. MP/428/10): Reference of letter issued by Updesh Vibhag]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="440">
+			<subreport>
+				<reportElement x="27" y="20" width="200" height="100"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_ID">
+					<subreportParameterExpression><![CDATA[$P{Event_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="From_Date">
+					<subreportParameterExpression><![CDATA[$P{From_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="To_Date">
+					<subreportParameterExpression><![CDATA[$P{To_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_Name">
+					<subreportParameterExpression><![CDATA[$P{Event_Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Daily Arrivals By State.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="27" y="160" width="200" height="100"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_ID">
+					<subreportParameterExpression><![CDATA[$P{Event_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="From_Date">
+					<subreportParameterExpression><![CDATA[$P{From_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="To_Date">
+					<subreportParameterExpression><![CDATA[$P{To_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_Name">
+					<subreportParameterExpression><![CDATA[$P{Event_Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Daily Arrivals_By_Sadan.jasper"]]></subreportExpression>
+			</subreport>
+			<subreport>
+				<reportElement x="27" y="308" width="200" height="100"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_ID">
+					<subreportParameterExpression><![CDATA[$P{Event_ID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="From_Date">
+					<subreportParameterExpression><![CDATA[$P{From_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="To_Date">
+					<subreportParameterExpression><![CDATA[$P{To_Date}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Event_Name">
+					<subreportParameterExpression><![CDATA[$P{Event_Name}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression class="java.lang.String"><![CDATA[$P{SUBREPORT_DIR} + "Departures By Date.jasper"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="145" width="100" height="1"/>
+			</break>
+			<break>
+				<reportElement x="0" y="9" width="100" height="1"/>
+			</break>
+			<break>
+				<reportElement x="0" y="286" width="100" height="1"/>
+			</break>
+		</band>
+	</summary>
+</jasperReport>
