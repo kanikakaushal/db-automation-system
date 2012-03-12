@@ -47,16 +47,36 @@
     public function checkStatus():void
 	{
 		if(initStatus.text == "Uninitiated" || initStatus.text == "Jigyasu"){
-			if(initStatus.text == "Uninitiated")
+			if(initStatus.text == "Uninitiated"){
 				component.DataSources.AllDataSources.isMemberUninitiated = true;
-			else
+				component.DataSources.AllDataSources.isMemberJigyasu = false;
+				component.DataSources.AllDataSources.isMemberInitiated = false;		
+			}
+			else{
 				component.DataSources.AllDataSources.isMemberUninitiated = false;
+				component.DataSources.AllDataSources.isMemberJigyasu = true;
+				component.DataSources.AllDataSources.isMemberInitiated = false;	
+			}
 			ageLabel.visible = true;
 			age.visible = true;
 			occupation.visible = true;
 			occupationLabel.visible = true;
-		}else if ((initStatus.text == "Initiated") || (initStatus.text == "")){
+		}else if ((initStatus.text == "Initiated")){
 			component.DataSources.AllDataSources.isMemberUninitiated = false;
+			component.DataSources.AllDataSources.isMemberJigyasu = false;	
+			component.DataSources.AllDataSources.isMemberInitiated = true;		
+			ageLabel.visible = false;
+			age.visible = false;
+			occupation.visible = false;
+			occupationLabel.visible = false;
+			age.text = "";
+			occupation.text = "";
+			letterNumber.text = "";
+			initParentName.text = "";
+		}else if(initStatus.text == ""){
+			component.DataSources.AllDataSources.isMemberUninitiated = false;
+			component.DataSources.AllDataSources.isMemberJigyasu = false;
+			component.DataSources.AllDataSources.isMemberInitiated = false;			
 			ageLabel.visible = false;
 			age.visible = false;
 			occupation.visible = false;
@@ -104,6 +124,7 @@
 		childCount.selectedIndex = 0;
 		cAgeString.text = "";
 		radioButtonIsPrimary.selected = true;
+		component.DataSources.AllDataSources.isAssociateSelected = false;
 		assocToPrimaryRel.selectedItem = null;
 		assocToPrimaryRel.prompt = "Relation";
 		component.DataSources.AllDataSources.licenseeDetails = "";
@@ -946,6 +967,7 @@
 						case "Private Quarters":
 							btnSmartAssist.enabled = true;
 							component.DataSources.AllDataSources.smartAssistTargetTabToBeEnabled = 2;							
+							component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = -1;
 							if(radioButtonIsPrimary.selected)
 							{
 								component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = true;
@@ -954,8 +976,9 @@
 						case "Outside Dayalbagh":
 							btnSmartAssist.enabled = false;
 							component.DataSources.AllDataSources.licenseeDetails = "";
-							licenseeRelation.text =  "";						
-							component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;							
+							licenseeRelation.selectedItem = null;						
+							component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;
+							component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = -1;							
 						break;
 						case "Sabha Quarters":
 						case "Sadan":
@@ -966,7 +989,7 @@
 							component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = -1;
 							btnSmartAssist.enabled = true;
 							component.DataSources.AllDataSources.licenseeDetails = "";
-							licenseeRelation.text =  "";						
+							licenseeRelation.selectedItem = null;				
 							
 							component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;
 						break;						
@@ -975,13 +998,18 @@
 					}
             }
             
-            private function filterSmartAssist(event:Event):void{
-            	component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = (event.target).selectedIndex;
+            private function filterSmartAssist(event:Event):void{            	
 /* Change added to speed automate entry of data in Local Address instead of having to explicitly add through Smart Assist */            	
 				if(lAccoType.selectedLabel == 'Sadan')
-					lAddress.text = (event.target).selectedLabel;
-				else
+					lAddress.text = (event.target).selectedLabel;					
+				else{
 					lAddress.text = "";
+					component.DataSources.AllDataSources.licenseeDetails = "";
+					licenseeRelation.selectedItem = null;						
+					if(lAccoType.selectedLabel == 'Private Quarters' || lAccoType.selectedLabel == 'Sabha Quarters'){
+						component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = (event.target).selectedIndex;		
+					}
+				}
 /* Change added to speed automate entry of data in Local Address instead of having to explicitly add through Smart Assist */            	
             }
 
@@ -1003,14 +1031,24 @@
 	
 	private function handleAssociateRadioButtonClick():void{
 		component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;
-//		component.DataSources.AllDataSources.isAssociateSelected = true;
+		component.DataSources.AllDataSources.isAssociateSelected = true;
 		validateUs();
 	};
 	
 	private function handlePrimaryRadioButtonClick():void{
-//		component.DataSources.AllDataSources.isAssociateSelected = false;		
+		component.DataSources.AllDataSources.isAssociateSelected = false;		
 		if(lAccoType.text == "Private Quarters"){
 			component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = true;
 		}
 		validateUs();
 	};
+	
+	private function assignSelectedIndex() : void{
+    	accoDetailsComboBox.selectedIndex = component.DataSources.AllDataSources.smartAssistAccoDetailsIndex;
+   	}
+
+            private function onUpdateDataProvider( dp : Object ) : Object            
+            {
+                accoDetailsComboBox.callLater( assignSelectedIndex );
+                return dp;
+            }

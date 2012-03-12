@@ -80,7 +80,7 @@
 			[Bindable]
 			public static var editRegLocalAddressString:String = "";									
 //			[Bindable]
-//			public static var isAssociateSelected:Boolean = false;									
+			public static var isAssociateSelected:Boolean = false;									
 
 
 			/* These are used for New Registration */			
@@ -116,6 +116,8 @@
 																<relationship label="Mother In Law"/>
 																<relationship label="Grand father"/>
 																<relationship label="Grand mother"/>
+																<relationship label="Samdhan"/>
+																<relationship label="Samdhi"/>
 															</relationships>
 														</root>);
 			[Bindable]
