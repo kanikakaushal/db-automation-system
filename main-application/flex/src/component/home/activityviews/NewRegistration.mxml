@@ -167,9 +167,9 @@
 			        				selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoTypeIndex}"/>			        
 			    </ns1:MultiColumnFormItem>		    			    
 			    <ns1:MultiColumnFormItem id="accoDetails" label="Mohalla/Sadan Name:">
-			    	<mx:ComboBox id="accoDetailsComboBox" dataProvider="{component.DataSources.AllDataSources.accoType.accomodation.type.(@name == lAccoType.selectedItem.@name).field}"
+			    	<mx:ComboBox id="accoDetailsComboBox" dataProvider="{onUpdateDataProvider(component.DataSources.AllDataSources.accoType.accomodation.type.(@name == lAccoType.selectedItem.@name).field)}"
 			    				labelField="@name" prompt="Select One" change="filterSmartAssist(event);" rowCount="10"
-			    				selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoDetailsIndex}"/>
+			    				selectedIndex="{component.DataSources.AllDataSources.smartAssistAccoDetailsIndex}" />
 			    </ns1:MultiColumnFormItem>
 			    <ns1:MultiColumnFormItem id="smartAssistComponent">
 			    	<mx:Button id="btnSmartAssist" label="Smart Assist" click="{createSmartAssistPopupPanel()}" enabled="false"/>
@@ -267,8 +267,7 @@
 	<mx:NumberValidator id="val13" source="{accoDetailsComboBox}" lowerThanMinError="This field is required." property="selectedIndex" 
 		minValue="0" />
 	<CustomClasses:AdvancedStringValidator id="val14" source="{letterNumber}" property="text" required="true"
-											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
-											numeralNotAllowedError="Please enter alphabets only!" />
+											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="true" />
 	<CustomClasses:AdvancedStringValidator id="val15" source="{licenseeRelation}" property="text" required="true"
 											allowSpecialCharacters="true" allowSpaces="true" allowNumbers="false"
 											numeralNotAllowedError="Please enter alphabets only!" />

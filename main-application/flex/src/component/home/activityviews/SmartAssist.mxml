@@ -124,7 +124,8 @@
 				component.DataSources.AllDataSources.smartAssistAccoDetailsIndex = accoDetailsComboBox.selectedIndex;
 				component.DataSources.AllDataSources.smartAssistLAddressSelected = selectionString;
 				component.DataSources.AllDataSources.editRegLocalAddressString = selectionString;	
-//				component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;			
+				component.DataSources.AllDataSources.smartAssistTargetTabToBeEnabled = 0;
+				component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;			
 			}
 			else if(smartAssistTabNavigator.selectedChild.label == 'Sadan'){
 				component.DataSources.AllDataSources.smartAssistAccoTypeIndex = 
@@ -133,7 +134,8 @@
 					component.DataSources.AllDataSources.accoType.accomodation.type.(@name == selectionCategory).field.(@name == selectionString).@id;
 				component.DataSources.AllDataSources.smartAssistLAddressSelected = selectionString;
 				component.DataSources.AllDataSources.editRegLocalAddressString = selectionString;
-//				component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;				
+				component.DataSources.AllDataSources.smartAssistTargetTabToBeEnabled = 1;
+				component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;				
 			}
 			else if(smartAssistTabNavigator.selectedChild.label == 'Private Quarters'){
 				component.DataSources.AllDataSources.smartAssistAccoTypeIndex = 
@@ -142,9 +144,12 @@
 				component.DataSources.AllDataSources.smartAssistLAddressSelected = selectionString;
 				component.DataSources.AllDataSources.licenseeDetails = selectedLicenseeName;
 				component.DataSources.AllDataSources.editRegLocalAddressString = selectionString;
-//				if(component.DataSources.AllDataSources.isAssociateSelected){	
-//					component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = true;
-//				}			
+				component.DataSources.AllDataSources.smartAssistTargetTabToBeEnabled = 2;
+				if(component.DataSources.AllDataSources.isAssociateSelected){	
+					component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = false;
+				}else{
+					component.DataSources.AllDataSources.shouldLicenseeDetailsBeShown = true;
+				}
 			}			
 			if(adg != null)
 				if(adg.dataProvider != null) 
