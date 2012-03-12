@@ -101,7 +101,13 @@ public class CardPdfPrinter implements IPrinter {
 		} else if (tvc.getGender().equalsIgnoreCase("Female")
 				&& tvc.getInitiationStatus().equalsIgnoreCase("Initiated")) {
 			title = "PBn.";
-		}
+		} else if (tvc.getGender().equalsIgnoreCase("Male")
+				&& !tvc.getInitiationStatus().equalsIgnoreCase("Initiated")) {
+			title = "Mr.";
+		} else if (tvc.getGender().equalsIgnoreCase("Female")
+				&& !tvc.getInitiationStatus().equalsIgnoreCase("Initiated")) {
+			title = "Ms.";
+		} 
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

@@ -74,7 +74,7 @@ public class TvcIbatisDao implements ITvcDao {
 			seqNo = 1;
 		}
 
-		String tvcId = tvcMember.getBranchId() + "7" + padZeros(seqNo.toString()) + "M";
+		String tvcId = padZeros(tvcMember.getBranchId(), 7) + "7" + padZeros(seqNo.toString(), 4) + "M";
 		tvcMember.setTvcId(tvcId);
 		params.put("tvc", tvcMember);
 		params.put("eventId", eventId);
@@ -279,9 +279,9 @@ public class TvcIbatisDao implements ITvcDao {
 		return "Success";
 	}
 	
-	private String padZeros(String number){
+	private String padZeros(String number, int padLength){
 		String paddedNumber = number;
-		while(paddedNumber.length() < 5){
+		while(paddedNumber.length() < padLength){
 			paddedNumber = "0" + paddedNumber; 
 		}
 		return paddedNumber;
