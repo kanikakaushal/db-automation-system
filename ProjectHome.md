@@ -1,0 +1,1 @@
+This project tracks all information related to business, functional, technical and infrastructural aspects of the automation system.
